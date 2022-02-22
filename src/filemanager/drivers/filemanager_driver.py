@@ -1,5 +1,6 @@
 
 import mimetypes
+import os
 from ..contants import NOT_IMPLEMENTED_MSG
 
 
@@ -12,6 +13,9 @@ class FileManagerDriver:
         self.storage = application.make("storage")
         self.root = self.storage.disk("local")
         self.root_path = self.root.get_path("filemanager")
+        
+        if not os.path.exists(self.root_path):
+            os.mkdir(self.root_path)
 
     def _get_path(self, extra=None) -> str:
         raise NotImplementedError(NOT_IMPLEMENTED_MSG)
