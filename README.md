@@ -11,8 +11,9 @@
   
   <img alt="PyPI" src="https://img.shields.io/pypi/v/masonite-filemanager">
   <img src="https://img.shields.io/badge/python-3.7+-blue.svg" alt="Python Version">
-  <img alt="GitHub release (latest by date including pre-releases)" src="https://img.shields.io/github/v/release/yubarajshrestha/masonite-filemanager?include_prereleases">
+  <img alt="GitHub release (latest by date including pre-releases)" src="https://img.shields.io/github/v/release/yubarajshrestha/masonite-filemanager">
   <img alt="License" src="https://img.shields.io/github/license/yubarajshrestha/masonite-filemanager">
+  <a href="https://github.com/yubarajshrestha/masonite-filemanager/stargazers"><img alt="star" src="https://img.shields.io/github/stars/yubarajshrestha/masonite-filemanager" /></a>
   <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 </p>
 
