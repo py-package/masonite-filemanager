@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<script src="https://cdn.tailwindcss.com"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+		integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ=="
+		crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<title>FileManager</title>
+	<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14"></script>
+	<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+	<script src="https://unpkg.com/dropzone@6.0.0-beta.1/dist/dropzone-min.js"></script>
+	<link href="https://unpkg.com/dropzone@6.0.0-beta.1/dist/dropzone.css" rel="stylesheet" type="text/css" />
+
+	<script src="/js/glightbox.min.js"></script>
+	<link href="/assets/glightbox.min.css" rel="stylesheet" type="text/css" />
+	<style>
+		.dz-drag-hover {
+			background-color: #dbeafe;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="fixed w-full flex h-12 z-10 justify-between border-b border-gray-300 items-center px-8 bg-gray-100">
+		<span class="font-bold uppercase">FileManager</span>
+	</div>
+	<div class="flex flex-row min-h-screen overflow-hidden pt-12 bg-gray-100 text-gray-800" x-data="filemanager">
+
+		<!-- Include Sidebar -->
+		@include 'filemanager/sidebar.html'
+
+		<!-- Include folder-form -->
+		@include 'filemanager/partials/create_form.html'
+
+		<!-- Include folder-form -->
+		@include 'filemanager/partials/rename_form.html'
+
+		<main class="main flex flex-col flex-grow ml-64 transition-all duration-150 ease-in" id="dropzone-container">
+			<div class="main-content relative flex flex-col flex-grow p-4">
+				<div class="fixed w-full flex -ml-4 h-12 flex items-center border-b bg-gray-100 border-gray-300 -mt-4"
+					style="z-index: 1;">
+					<span class="ml-4"><em class="fa fa-search"></em></span>
+					<input type="text"
+						class="w-full bg-transparent block focus:outline-none focus:border-none px-2 text-sm"
+						placeholder="Search for files and folders" />
+				</div>
+				<div class="pt-12 overflow-y-hidden overflow-x-auto">
+					<div class="text-xl mb-6">All Files</div>
+					<section class="mb-10" id="folders">
+						<div class="text-xs uppercase text-gray-500 font-semibold">
+							Folders
+						</div>
+						<div class="content grid grid-cols-4 gap-4 mt-2">
+							<!-- content goes here -->
+						</div>
+					</section>
+					<section class="mb-10" id="files">
+						<div class="text-xs uppercase text-gray-500 font-semibold">
+							Files
+						</div>
+						<div class="content grid grid-cols-4 gap-4 mt-2">
+							<!-- content goes here -->
+						</div>
+					</section>
+				</div>
+			</div>
+
+			<footer class="footer px-4 py-6">
+				<div class="footer-content">
+					<p class="text-sm text-gray-600 text-center">
+						© Filemanager. All rights reserved.
+						<a href="">by Yubaraj Shrestha</a>
+					</p>
+				</div>
+			</footer>
+		</main>
+
+	</div>
+
+	<script>
+		const SetupVideoPreview = () => {
+			const videos = document.getElementsByTagName("video");
+
+			const startPreview = (video) => {
+				video.muted = true;
+				video.currentTime = 1;
+				video.playbackRate = 0.5;
+				video.play();
+			}
+
+			const stopPreview = (video) => {
+				video.currentTime = 0;
+				video.playbackRate = 1;
+				video.pause();
+			}
+
+			const listen = (video) => {
+				let previewTimeout = null;
+				video.addEventListener("mouseenter", () => {
+					startPreview(video);
+					previewTimeout = setTimeout(stopPreview, 4000);
+				});
+
+				video.addEventListener("mouseleave", () => {
+					clearTimeout(previewTimeout);
+					previewTimeout = null;
+					stopPreview(video);
+				});
+			}
+
+			if (videos.length) {
+				for (let i = 0; i < videos.length; i++) {
+					listen(videos[i]);
+				}
+			}
+		}
+
+		const SetupLigthBox = () => {
+			const lightbox = GLightbox({
+				touchNavigation: true,
+				loop: true,
+				autoplayVideos: true
+			});
+		}
+
+		const filemanager = {
+			renameForm: {
+				name: '',
+				path: '',
+				visibility: false,
+			},
+			createForm: {
+				name: '',
+				visibility: false,
+			},
+			dzone: null,
+			totalSize: '0 byte',
+			async init() {
+				this.dzone = new Dropzone("main#dropzone-container", { url: window.location.href });
+				this.dzoneEvents();
+				await this.fetchFilesFolders();
+				// SetupVideoPreview();
+				SetupLigthBox();
+			},
+
+			async dzoneEvents() {
+				this.dzone.on("success", async (file, response) => {
+					this.dzone.removeFile(file);
+					this.dzone.emit("complete", file);
+					this.dzone.emit("queuecomplete");
+					await this.fetchFilesFolders();
+				});
+			},
+
+			getEndPoints(endpoint) {
+				const query = window.location.href.split("?");
+				if (query.length > 1) {
+					endpoint += `?${query[1]}`;
+				}
+				return endpoint
+			},
+
+			async fetchFilesFolders() {
+				try {
+					const response = await axios.get(this.getEndPoints('/filemanager/all-files'));
+					this.renderUI(response.data);
+					this.totalSize = response.data.total_size;
+				} catch (error) {
+					console.log(error);
+				}
+			},
+
+			async openFolder(folder) {
+				const fullUrl = window.location.href;
+				const selector = fullUrl.split("?");
+				if (selector.length > 1) {
+					window.location.href = `${fullUrl},${folder}`;
+				} else {
+					window.location.href = `${fullUrl}?folder=${folder}`;
+				}
+
+			},
+
+			async createFolder() {
+				if (!this.createForm.name || this.createForm.name.length == 0) return;
+				try {
+					const response = await axios.post(this.getEndPoints('/filemanager/create-folder'), {
+						name: this.createForm.name,
+					});
+					this.fetchFilesFolders();
+					this.resetCreateForm();
+				} catch (error) {
+					console.log(error);
+				}
+			},
+
+			async openRenameForm(name, path) {
+				this.renameForm = {
+					name: name,
+					path: path,
+					visibility: true,
+				}
+			},
+
+			async renameFileFolder() {
+				if (!this.renameForm.name || this.renameForm.name.length == 0) return;
+				try {
+					const response = await axios.post(this.getEndPoints('/filemanager/rename'), {
+						name: this.renameForm.name,
+						path: this.renameForm.path,
+					});
+					this.fetchFilesFolders();
+					this.resetRenameForm();
+				} catch (error) {
+					console.log(error);
+				}
+			},
+
+			resetRenameForm() {
+				this.renameForm = {
+					name: '',
+					path: '',
+					visibility: false,
+				}
+			},
+
+			resetCreateForm() {
+				this.createForm = {
+					name: '',
+					visibility: false,
+				}
+			},
+
+			async deleteFolder(path) {
+				try {
+					const response = await axios.post(this.getEndPoints('/filemanager/delete-folder'), {
+						path: path,
+					});
+					this.fetchFilesFolders();
+				} catch (error) {
+					console.log(error);
+				}
+			},
+
+			async deleteFile(path) {
+				try {
+					const response = await axios.post(this.getEndPoints('/filemanager/delete-file'), {
+						path: path,
+					});
+					this.fetchFilesFolders();
+				} catch (error) {
+					console.log(error);
+				}
+			},
+
+			getFileTypePreview(file) {
+				let fileType = file.mime.split('/')[0];
+				if (fileType == 'image') {
+					return `<img src="${file.url}" class="w-full h-full object-cover">`;
+				}
+
+				if (fileType == 'video') {
+					return `<video class="w-full h-full object-cover">
+						<source src="${file.url}" type="${file.mime}">
+					</video>`;
+				}
+				return "";
+			},
+
+			getFileIcon(file) {
+				let fileType = file.mime.split('/')[0];
+				if (fileType == 'image') {
+					return `<i class="fas fa-file-image text-green-600"></i>`;
+				}
+				if (fileType == 'video') {
+					return `<i class="fas fa-video text-green-600"></i>`;
+				}
+			},
+
+			async renderUI(FileFolders) {
+				let FileHtml = "";
+				let FolderHtml = "";
+
+				if (FileFolders.files.length > 0) {
+					FileFolders.files.forEach((file) => {
+						FileHtml += `
+						<div x-data="{show: false}" class="rounded cursor-pointer relative border border-gray-300 p-1" x-on:contextmenu="$event.preventDefault(); show=true">
+							<div>
+								<a href="${file.url}" class="block glightbox w-full h-32 overflow-hidden bg-gray-300 rounded">
+									${this.getFileTypePreview(file)}
+								</a>
+								<div class="text-xs text-gray-500 font-semibold mt-3 overflow-ellipsis whitespace-nowrap overflow-hidden">${this.getFileIcon(file)} &nbsp; ${file.name}</div>
+								<div class="text-xs text-gray-500">${file.size}</div>
+							</div>
+
+							<div x-show="show" class="absolute right-5 top-2 bg-gray-100 rounded-md w-44 z-1" @click.away="show = false" x-transition:enter="transition ease duration-100 transform" x-transition:enter-start="opacity-0 scale-90 translate-y-1" x-transition:enter-end="opacity-100 scale-100 translate-y-0" x-transition:leave="transition ease duration-100 transform" x-transition:leave-start="opacity-100 scale-100 translate-y-0" x-transition:leave-end="opacity-0 scale-90 translate-y-1">
+								<div class="bg-white overflow-auto rounded-lg shadow-md w-full relative z-10 py-2 border border-gray-300 text-gray-800 text-xs">
+									<ul class="list-reset">
+										<li>
+											<button class="px-4 w-full py-1 flex hover:bg-gray-100 no-underline hover:no-underline transition-colors duration-100" @click.prevent="show=false; openRenameForm('${file.name}', '${file.path}')">Rename</button>
+											<button class="px-4 w-full py-1 flex hover:bg-gray-100 no-underline hover:no-underline transition-colors duration-100 text-red-500" @click.prevent="show=false; deleteFile('${file.path}')">Delete File</button>
+										</li>
+									</ul>
+								</div>
+							</div>
+						</div>
+					`;
+					});
+				} else {
+					FileHtml = `
+						<div class="text-left text-gray-500">
+							<p class="text-xs mt-3">No Files Found</p>
+						</div>
+					`;
+				}
+
+				if (FileFolders.folders.length > 0) {
+					FileFolders.folders.forEach((folder) => {
+						FolderHtml += `
+						<div x-data="{show: false}" class="rounded cursor-pointer bg-white focus:bg-gray-200 hover:shadow relative border border-gray-200 p-2 transition duration-200" x-on:contextmenu="$event.preventDefault(); show=true">
+							<div class="grid grid-cols-5 gap-4 items-center" x-on:click.prevent="openFolder('${folder.name}')">
+								<div class=""><em class="fas fa-folder fa-3x"></em></div>
+								<div class="ml-4 relative col-span-4 flex flex-col">
+									<div class="text-xs text-gray-500 font-semibold overflow-ellipsis whitespace-nowrap overflow-hidden">${folder.name}</div>
+									<span class="text-xs text-gray-500">${folder.total_files} ${folder.total_files > 1 ? "files" : "file"
+							}, ${folder.size}</span>
+								</div>
+							</div>
+							<div x-show="show" class="absolute right-5 top-2 py-1 bg-gray-100 rounded-md w-44 z-1" @click.away="show = false" x-transition:enter="transition ease duration-100 transform" x-transition:enter-start="opacity-0 scale-90 translate-y-1" x-transition:enter-end="opacity-100 scale-100 translate-y-0" x-transition:leave="transition ease duration-100 transform" x-transition:leave-start="opacity-100 scale-100 translate-y-0" x-transition:leave-end="opacity-0 scale-90 translate-y-1">
+								<div class="bg-white overflow-auto rounded-lg shadow-md w-full relative z-10 py-2 border border-gray-300 text-gray-800 text-xs">
+									<ul class="list-reset">
+										<li>
+											<button class="px-4 w-full py-1 flex hover:bg-gray-100 no-underline hover:no-underline transition-colors duration-100" @click.prevent="show=false; openRenameForm('${folder.name}', '${folder.path}')">Rename Folder</button>
+											<button class="px-4 w-full py-1 flex hover:bg-gray-100 no-underline hover:no-underline transition-colors duration-100 text-red-500" @click.prevent="show=false; deleteFolder('${folder.path}')">Delete Folder</button>
+										</li>
+									</ul>
+								</div>
+							</div>
+						</div>
+					`;
+					});
+				} else {
+					FolderHtml = `
+					<div class="text-left text-gray-500">
+						<p class="text-xs mt-3">No Folders Found</p>
+					</div>
+				`;
+				}
+
+				document.querySelector("#files .content").innerHTML = FileHtml;
+				document.querySelector("#folders .content").innerHTML = FolderHtml;
+			}
+		}
+	</script>
+</body>
+
+</html>

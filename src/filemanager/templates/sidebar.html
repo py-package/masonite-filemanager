@@ -1,0 +1,25 @@
+<aside
+    class="sidebar fixed p-4 w-64 border-r border-gray-300 h-screen overflow-x-auto text-sm transform -translate-x-full md:translate-x-0 transition-transform duration-150 ease-in">
+    <button @click="formVisibility = true" class="w-full p-1 bg-blue-500 text-white font-semibold rounded">New</button>
+
+    <div class="mt-8 uppercase text-xs font-semibold text-gray-500">My Drive</div>
+
+    <div class="mt-4">
+        <a href="/filemanager" class="block hover:bg-gray-200">
+            <div class="flex items-center py-1">
+                <em class="fa fa-folder text-gray-500"></em>
+                <span class="ml-4">All Files</span>
+            </div>
+        </a>
+    </div>
+
+    <div class="my-4 h-1 bg-gray-200"></div>
+
+    <div class="px-2 py-1 flex flex-col bg-green-50 rounded border-2 border-green-600 text-green-600">
+        <div class="flex items-center justify-between">
+            <em class="fa fa-cloud"></em>
+            <span class="ml-3 font-semibold mr-1" x-html="totalSize"></span>
+        </div>
+    </div>
+
+</aside>
