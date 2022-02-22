@@ -1,7 +1,7 @@
 # filemanager
 
 <p align="center">
-    <img src="https://banners.beyondco.de/filemanager.png?theme=light&packageManager=pip+install&packageName=masonite-filemanager&pattern=topography&style=style_1&description=Package description in one line displayed e.g. in README&md=1&showWatermark=1&fontSize=100px&images=https%3A%2F%2Fgblobscdn.gitbook.com%2Fspaces%2F-L9uc-9XAlqhXkBwrLMA%2Favatar.png">
+    <img src="https://banners.beyondco.de/filemanager.png?theme=light&packageManager=pip+install&packageName=masonite-filemanager&pattern=topography&style=style_1&description=File management solution for Masonite&md=1&showWatermark=1&fontSize=100px&images=https%3A%2F%2Fgblobscdn.gitbook.com%2Fspaces%2F-L9uc-9XAlqhXkBwrLMA%2Favatar.png">
 </p>
 
 <p align="center">
