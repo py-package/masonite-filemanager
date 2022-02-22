@@ -13,6 +13,7 @@ class FileManagerProvider(PackageProvider):
             .name("filemanager")
             .config("config/filemanager.py", publish=True)
             .views("templates", publish=False)
+            .assets("resources")
             .routes("routes/route.py")
         )
 

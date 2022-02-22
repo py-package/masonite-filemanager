@@ -18,4 +18,5 @@ STATICFILES = {
     'storage/static': 'static/',
     'storage/compiled': 'assets/',
     'storage/public': '/',
+    'vendor/filemanager': 'filemanager/',
 }

@@ -13,11 +13,11 @@
 	<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14"></script>
 	<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-	<script src="https://unpkg.com/dropzone@6.0.0-beta.1/dist/dropzone-min.js"></script>
-	<link href="https://unpkg.com/dropzone@6.0.0-beta.1/dist/dropzone.css" rel="stylesheet" type="text/css" />
+	<script src="/filemanager/dropzone.min.js"></script>
+	<link href="/filemanager/dropzone.min.css" rel="stylesheet" type="text/css" />
 
-	<script src="/js/glightbox.min.js"></script>
-	<link href="/assets/glightbox.min.css" rel="stylesheet" type="text/css" />
+	<script src="/filemanager/glightbox.min.js"></script>
+	<link href="/filemanager/glightbox.min.css" rel="stylesheet" type="text/css" />
 	<style>
 		.dz-drag-hover {
 			background-color: #dbeafe;
@@ -196,6 +196,13 @@
 					this.resetCreateForm();
 				} catch (error) {
 					console.log(error);
+				}
+			},
+
+			async openCreateForm() {
+				this.createForm = {
+					name: "",
+					visibility: true,
 				}
 			},
 

@@ -82,7 +82,7 @@ class FileManagerDriver:
             filtered_folders = []
             
             for folder in folders:
-                if all(key in folder for key in ['name', 'size', 'path', 'created', 'modified', 'url', 'total_files']):
+                if all(key in folder for key in ['name', 'size', 'path', 'created', 'modified', 'total_files']):
                     filtered_folders.append(folder)
                 
             return filtered_folders

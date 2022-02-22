@@ -21,7 +21,7 @@ class FileManagerController(Controller):
     
     def upload(self):
         file = self.request.input('file')
-        self.filemanager.upload(file)
+        self.manager.provider().upload(file)
         
         return self.response.json({
             "message": "File uploaded!",
@@ -30,7 +30,7 @@ class FileManagerController(Controller):
     def rename(self):
         name = self.request.input('name')
         path = self.request.input('path')
-        self.filemanager.rename(path, name)
+        self.manager.provider().rename(path, name)
         
         return self.response.json({
             "message": "File/Folder renamed!",
@@ -39,8 +39,8 @@ class FileManagerController(Controller):
     def create_folder(self):
         name = self.request.input('name')
         
-        if not self.filemanager.exists(name):
-            self.filemanager.create_folder(name)
+        if not self.manager.provider().exists(name):
+            self.manager.provider().create_folder(name)
             
             return self.response.json({
                 "message": 'Folder Created...',
@@ -54,7 +54,7 @@ class FileManagerController(Controller):
         path = self.request.input('path')
         
         try:
-            self.filemanager.delete_folder(path)
+            self.manager.provider().delete_folder(path)
             
             return self.response.json({
                 "message": 'Folder deleted...',
@@ -70,7 +70,7 @@ class FileManagerController(Controller):
         path = self.request.input('path')
         
         try:
-            self.filemanager.delete_file(path)
+            self.manager.provider().delete_file(path)
             
             return self.response.json({
                 "message": 'Folder deleted...',
