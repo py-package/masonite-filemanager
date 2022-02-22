@@ -1,11 +1,9 @@
 """A FileManagerProvider Service Provider."""
 
-import os
-import pathlib
 from masonite.packages import PackageProvider
 
-class FileManagerProvider(PackageProvider):
 
+class FileManagerProvider(PackageProvider):
     def configure(self):
         """Register objects into the Service Container."""
         (

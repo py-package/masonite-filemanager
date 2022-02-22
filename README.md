@@ -26,13 +26,11 @@ Package description in one line displayed e.g. in README
 - _Add your package main features here_
 - _and here_
 
-## Official Masonite Documentation
+## Masonite Filemanager
 
-New to Masonite ? Please first read the [Official Documentation](https://docs.masoniteproject.com/).
-Masonite strives to have extremely comprehensive documentation 😃. It would be wise to go through the tutorials there.
-If you find any discrepencies or anything that doesn't make sense, be sure to comment directly on the documentation to start a discussion!
+A simple yet powerful file management solution for your masonite application.
 
-Have questions or want to talk? Be sure to join the [Masonite Discord Community](https://discord.gg/TwKeFahmPZ)!
+> Note this is still in development.
 
 ## Installation
 
@@ -42,18 +40,18 @@ pip install masonite-filemanager
 
 ## Configuration
 
-Add filemanagerProvider to your project in `config/providers.py`:
+Add FileManagerProvider to your project in `config/providers.py`:
 
 ```python
 # config/providers.py
 # ...
-from filemanager import filemanagerProvider
+from filemanager.providers import FileManagerProvider
 
 # ...
 PROVIDERS = [
     # ...
     # Third Party Providers
-    filemanagerProvider,
+    FileManagerProvider,
     # ...
 ]
 ```
@@ -78,6 +76,4 @@ Please read the [Contributing Documentation](CONTRIBUTING.md) here.
 
 ## License
 
-
 filemanager is open-sourced software licensed under the [MIT license](LICENSE).
-

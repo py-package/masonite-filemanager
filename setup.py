@@ -11,19 +11,24 @@ setup(
     version="0.0.1",
     packages=[
         "filemanager",
-        "filemanager.providers",
         "filemanager.config",
+        "filemanager.constants",
+        "filemanager.controllers",
+        "filemanager.drivers",
+        "filemanager.providers",
         "filemanager.routes",
+        "filemanager.resources",
+        "filemanager.templates",
     ],
     package_dir={"": "src"},
-    description="Package description in one line displayed e.g. in README",
+    description="File management solution for Masonite",
     long_description=long_description,
     long_description_content_type="text/markdown",
     # The project's main homepage.
-    url="https://github.com/MasoniteFramework/masonite-filemanager",
+    url="https://github.com/yubarajshrestha/masonite-filemanager",
     # Author details
-    author="John Doe",
-    author_email="john.doe@domain.com",
+    author="Yubaraj Shrestha",
+    author_email="companion.krish@outlook.com",
     # Choose your license
     license="MIT license",
     # If your package should include things you specify in your MANIFEST.in file
@@ -39,27 +44,22 @@ setup(
         "Development Status :: 3 - Alpha",
         # Indicate who your project is intended for
         "Intended Audience :: Developers",
-        "Topic :: Software Development :: Build Tools",
         "Environment :: Web Environment",
         # Pick your license as you wish (should match "license" above)
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
-        "Topic :: Internet :: WWW/HTTP",
-        "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
-        "Topic :: Internet :: WWW/HTTP :: WSGI",
         "Topic :: Software Development :: Libraries :: Application Frameworks",
         "Topic :: Software Development :: Libraries :: Python Modules",
         # List package on masonite packages website
         "Framework :: Masonite",
     ],
     # What does your project relate to?
-    keywords="Masonite, Python, Development",
+    keywords="Masonite, Python, Development, Filemanager",
     # List run-time dependencies here.  These will be installed by pip when
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
@@ -85,6 +85,6 @@ setup(
     # installed, specify them here.  If using Python 2.6 or less, then these
     # have to be included in MANIFEST.in as well.
     package_data={
-        # 'templates/index.html': [],
+        'templates/index.html': [],
     },
 )

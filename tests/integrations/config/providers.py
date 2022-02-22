@@ -23,7 +23,7 @@ from masonite.scheduling.providers import ScheduleProvider
 from masonite.notification.providers import NotificationProvider
 from masonite.validation.providers import ValidationProvider
 
-from src.filemanager.providers.filemanager_provider import FileManagerProvider
+from src.filemanager.providers import FileManagerProvider
 
 PROVIDERS = [
     FrameworkProvider,
@@ -46,5 +46,5 @@ PROVIDERS = [
     ValidationProvider,
     AuthorizationProvider,
     ORMProvider,
-    FileManagerProvider
+    FileManagerProvider,
 ]

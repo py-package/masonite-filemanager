@@ -15,8 +15,8 @@ DISKS = {
 
 STATICFILES = {
     # folder          # template alias
-    'storage/static': 'static/',
-    'storage/compiled': 'assets/',
-    'storage/public': '/',
-    'vendor/filemanager': 'filemanager/',
+    "storage/static": "static/",
+    "storage/compiled": "assets/",
+    "storage/public": "/",
+    "vendor/filemanager": "filemanager/",
 }
