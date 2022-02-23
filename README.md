@@ -19,13 +19,19 @@
 
 A simple yet powerful file management solution for your masonite application.
 
-> Note this is still in development.
-
 ## Features
 
-- Manager Server Files (Currently only supports local files)
-- Upload Files
-- Preview Files
+- [x] Manager Server Files (Currently only supports local files)
+- [x] Upload Files
+- [x] Preview Files
+- [x] Rename Files/Folders
+- [x] Delete Files
+- [x] Download Files
+- [ ] Move Files
+- [ ] Protect Routes
+- [ ] FileManager FormField
+- [ ] Image Editing
+- [ ] Third Party Driver Support (S3, DigitalOcean Space, etc)
 
 ## Installation
 
@@ -57,9 +63,24 @@ Then you can publish the package resources (if needed) by doing:
 python craft package:publish filemanager
 ```
 
+Finally add following to `STATICFILES` section in `config/filesystem.py`:
+
+```python
+# config/filesystem.py
+
+STATICFILES = {
+    # ...
+    # FileManager resources
+    'resources/vendor/filemanager': 'filemanager-assets/',
+    "storage/framework/filesystem/filemanager": "filemanager-uploads/",
+}
+```
+
 ## Usage
 
-> Note this is still in development.
+Once finishing configurations, you can access the file manager by using the following route:
+
+`http://localhost:8000/filemanager`
 
 ## Contributing
 

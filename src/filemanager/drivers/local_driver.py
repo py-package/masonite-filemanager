@@ -103,8 +103,8 @@ class LocalDriver(FileManagerDriver):
                 created_at = time.ctime(item.stat().st_ctime)
                 modified_at = time.ctime(item.stat().st_mtime)
 
-                file_url = item.path.replace(self.root.get_path(""), "")
-                file_url = "/uploads/" + file_url.replace("\\", "/")
+                file_url = item.path.replace(self.root_path, "/filemanager-uploads")
+                file_url = file_url.replace("\\", "/")
 
                 file_item = {
                     "name": name if item.is_dir() else item.name.split(".")[0],

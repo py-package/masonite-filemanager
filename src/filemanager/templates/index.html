@@ -13,11 +13,11 @@
 	<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14"></script>
 	<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
-	<script src="/filemanager/dropzone.min.js"></script>
-	<link href="/filemanager/dropzone.min.css" rel="stylesheet" type="text/css" />
+	<script src="/filemanager-assets/dropzone.min.js"></script>
+	<link href="/filemanager-assets/dropzone.min.css" rel="stylesheet" type="text/css" />
 
-	<script src="/filemanager/glightbox.min.js"></script>
-	<link href="/filemanager/glightbox.min.css" rel="stylesheet" type="text/css" />
+	<script src="/filemanager-assets/glightbox.min.js"></script>
+	<link href="/filemanager-assets/glightbox.min.css" rel="stylesheet" type="text/css" />
 	<style>
 		.dz-drag-hover {
 			background-color: #dbeafe;
@@ -33,12 +33,6 @@
 
 		<!-- Include Sidebar -->
 		@include 'sidebar.html'
-
-		<!-- Include folder-form -->
-		@include 'partials/create_form.html'
-
-		<!-- Include folder-form -->
-		@include 'partials/rename_form.html'
 
 		<main class="main flex flex-col flex-grow ml-64 transition-all duration-150 ease-in" id="dropzone-container">
 			<div class="main-content relative flex flex-col flex-grow p-4">
@@ -78,7 +72,14 @@
 					</p>
 				</div>
 			</footer>
+
 		</main>
+
+		<!-- Include folder-form -->
+		@include 'partials/create_form.html'
+
+		<!-- Include folder-form -->
+		@include 'partials/rename_form.html'
 
 	</div>
 
@@ -265,18 +266,64 @@
 				}
 			},
 
+			async downloadFile(name, path) {
+				let p = path.split('/')
+				let fileName = p.pop()
+				var link = document.createElement("a");
+				link.download = fileName;
+				link.href = path;
+				document.body.appendChild(link);
+				link.click();
+				document.body.removeChild(link);
+				delete link;
+			},
+
 			getFileTypePreview(file) {
 				let fileType = file.mime.split('/')[0];
+
 				if (fileType == 'image') {
-					return `<img src="${file.url}" class="w-full h-full object-cover">`;
+					return `
+						<a href="${file.url}" class="block glightbox w-full h-32 overflow-hidden bg-gray-300 rounded">
+							<img src="${file.url}" class="w-full h-full object-cover">
+						</a>
+					`;
 				}
 
 				if (fileType == 'video') {
-					return `<video class="w-full h-full object-cover">
-						<source src="${file.url}" type="${file.mime}">
-					</video>`;
+					return `
+						<a href="${file.url}" class="block glightbox w-full h-32 overflow-hidden bg-gray-300 rounded">
+							<video class="w-full h-full object-cover">
+								<source src="${file.url}" type="${file.mime}">
+							</video>
+						</a>
+					`;
 				}
-				return "";
+
+				if (fileType == 'audio') {
+					return `
+						<a href="${file.url}" target="_blank" class="block flex items-center justify-center w-full h-32 overflow-hidden bg-gray-300 rounded">
+							<i class="fas fa-music text-4xl text-gray-600"></i>
+						</a>
+					`;
+				}
+
+				if (file.mime == 'application/pdf') {
+					return `
+						<a href="${file.url}" target="_blank" class="block flex relative items-center justify-center w-full h-32 overflow-hidden bg-gray-300 rounded">
+							<!-- <i class="fas fa-file-pdf text-4xl text-gray-600"></i> -->
+							<embed src="${file.url}" type="application/pdf">
+							<span class="absolute w-full h-full bg-white bg-opacity-10" style="z-index: 1;"></span>
+						</a>
+					`;
+				}
+
+
+
+				return `
+					<a href="${file.url}" target="_blank" class="block w-full h-32 overflow-hidden bg-gray-300 rounded">
+						<i class="fas fa-file text-4xl text-gray-600"></i>
+					</a>
+				`;
 			},
 
 			getFileIcon(file) {
@@ -286,6 +333,13 @@
 				}
 				if (fileType == 'video') {
 					return `<i class="fas fa-video text-green-600"></i>`;
+				}
+				if (fileType == 'audio') {
+					return `<i class="fas fa-file-audio text-green-600"></i>`;
+				}
+
+				if (file.mime == 'application/pdf') {
+					return `<i class="fas fa-file-pdf text-green-600"></i>`;
 				}
 			},
 
@@ -298,9 +352,7 @@
 						FileHtml += `
 						<div x-data="{show: false}" class="rounded cursor-pointer relative border border-gray-300 p-1" x-on:contextmenu="$event.preventDefault(); show=true">
 							<div>
-								<a href="${file.url}" class="block glightbox w-full h-32 overflow-hidden bg-gray-300 rounded">
-									${this.getFileTypePreview(file)}
-								</a>
+								${this.getFileTypePreview(file)}
 								<div class="text-xs text-gray-500 font-semibold mt-3 overflow-ellipsis whitespace-nowrap overflow-hidden">${this.getFileIcon(file)} &nbsp; ${file.name}</div>
 								<div class="text-xs text-gray-500">${file.size}</div>
 							</div>
@@ -310,6 +362,7 @@
 									<ul class="list-reset">
 										<li>
 											<button class="px-4 w-full py-1 flex hover:bg-gray-100 no-underline hover:no-underline transition-colors duration-100" @click.prevent="show=false; openRenameForm('${file.name}', '${file.path}')">Rename</button>
+											<button class="px-4 w-full py-1 flex hover:bg-gray-100 no-underline hover:no-underline transition-colors duration-100" @click.prevent="show=false; downloadFile('${file.name}', '${file.url}')">Download</button>
 											<button class="px-4 w-full py-1 flex hover:bg-gray-100 no-underline hover:no-underline transition-colors duration-100 text-red-500" @click.prevent="show=false; deleteFile('${file.path}')">Delete File</button>
 										</li>
 									</ul>
