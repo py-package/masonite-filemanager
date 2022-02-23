@@ -71,7 +71,8 @@ Finally add following to `STATICFILES` section in `config/filesystem.py`:
 STATICFILES = {
     # ...
     # FileManager resources
-    'resources/vendor/filemanager': 'filemanager/',
+    'resources/vendor/filemanager': 'filemanager-assets/',
+    "storage/framework/filesystem/filemanager": "filemanager-uploads/",
 }
 ```
 
