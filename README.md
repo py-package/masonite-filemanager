@@ -86,10 +86,6 @@ Once finishing configurations, you can access the file manager by using the foll
 
 Please read the [Contributing Documentation](CONTRIBUTING.md) here.
 
-## Maintainers
-
-- [Yubaraj Shrestha](https://www.github.com/yubarajshrestha)
-
 ## License
 
 masonite-filemanager is open-sourced software licensed under the [MIT license](LICENSE).
