@@ -93,3 +93,6 @@ class FileManagerController(Controller):
                 "message": "Folder doesn't exists!",
             }
         )
+
+    def picker(self, view: View):
+        return view.render("filemanager:picker", {})

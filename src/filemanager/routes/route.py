@@ -12,5 +12,6 @@ ROUTES = Route.group(
         Route.post("/filemanager/create-folder", FileManagerController.create_folder),
         Route.post("/filemanager/delete-folder", FileManagerController.delete_folder),
         Route.post("/filemanager/delete-file", FileManagerController.delete_file),
+        Route.get("/filemanager/picker", FileManagerController.picker),
     ]
 )
