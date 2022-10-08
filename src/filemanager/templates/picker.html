@@ -84,6 +84,14 @@
     </div>
 
     <script>
+        axios.interceptors.request.use(function (config) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+            if (csrfToken) config.headers['X-CSRF-TOKEN'] = csrfToken;
+            return config;
+        }, function (error) {
+            return Promise.reject(error);
+        });
+
         const SetupVideoPreview = () => {
             const videos = document.getElementsByTagName("video");
 

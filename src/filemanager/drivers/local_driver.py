@@ -82,6 +82,17 @@ class LocalDriver(FileManagerDriver):
             print(e)
         return False
 
+    def delete_file(self, path) -> bool:
+        """Delete a file in the filemanager directory"""
+
+        try:
+            if os.path.exists(path):
+                os.unlink(path)
+                return True
+        except Exception as e:
+            print(e)
+        return False
+
     def all_files(self):
         data = {
             "folders": [],

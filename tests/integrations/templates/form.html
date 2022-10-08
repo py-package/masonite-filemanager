@@ -8,45 +8,15 @@
     Masonite 4
   </div>
 
-  <nav class="flex space-x-4 justify-center text-gray-500 uppercase text-sm">
-    <span class="px-3 py-2 hover:text-indigo-700 cursor-pointer" id="picker">
-      Select File
-    </span>
-  </nav>
-
+  <div class="file-picker">
+    <input type="hidden" name="j-sukai" />
+  </div>
+  <br />
+  <div class="file-picker has-preview">
+    <input type="hidden" name="j-sukai" />
+  </div>
 </div>
 {% endblock %}
 
 {% block js %}
-<script>
-  // create global filemanager function
-  window.filemanager = function (element, callback) {
-    const E = document.querySelector(element);
-    const child = window.open('/filemanager/picker', 'File Picker',
-      'height=400,width=1200,toolbar=no,directories=no,status=no, linemenubar=no,scrollbars=no,resizable=no ,modal=yes');
-
-    if (!window.SetUrl) {
-      window.SetUrl = function (url) {
-        callback(url, E);
-      }
-    }
-  };
-
-  filemanager("#picker", function (file, target) {
-    target.innerHTML = file;
-  });
-
-
-  const responseFromChildWindow = null;
-  async function openWindow(url) {
-    window.open(url, 'File Picker',
-      'height=400,width=1200,toolbar=no,directories=no,status=no, linemenubar=no,scrollbars=no,resizable=no ,modal=yes');
-  }
-
-  const picker = document.getElementById('picker');
-  picker.addEventListener('click', () => {
-    const url = '/filemanager/picker';
-    openWindow(url);
-  });
-</script>
 {% endblock %}

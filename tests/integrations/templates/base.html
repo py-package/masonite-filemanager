@@ -9,6 +9,7 @@
   <title>{% block title %}Masonite 4{% endblock %}</title>
   <link rel="shortcut icon" href="/favicon.ico">
   <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet" />
+  <link href="/filemanager-assets/picker.css" rel="stylesheet" />
   {% block head %}
   <!-- <link rel="stylesheet" href="/assets/css/app.css"> -->
   {% endblock %}
@@ -16,6 +17,7 @@
 
 <body>
   {% block content %}{% endblock %}
+  <script src="/filemanager-assets/picker.js"></script>
   {% block js %}
   <!-- <script src="/assets/js/app.js"></script> -->
   {% endblock %}

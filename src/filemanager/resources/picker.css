@@ -1,0 +1,32 @@
+.file-picker {
+    min-width: 32px;
+    background-color: red;
+    position: relative;
+    min-height: 16px;
+}
+
+.file-picker .preview {
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    position: absolute;
+}
+
+.file-picker .close {
+    position: absolute;
+    right: 2px;
+    top: 2px;
+    z-index: 2;
+    background: white;
+    padding: 0;
+    margin: 0;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    justify-content: center;
+    line-height: 0.9;
+    border-radius: 100%;
+    cursor: pointer;
+}
