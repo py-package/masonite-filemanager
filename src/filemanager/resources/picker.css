@@ -1,6 +1,8 @@
 .file-picker {
     min-width: 32px;
-    background-color: red;
+    padding: 8px;
+    border: 1px dotted black;
+    border-radius: 4px;
     position: relative;
     min-height: 16px;
 }
