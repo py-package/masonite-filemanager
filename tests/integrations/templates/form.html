@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Welcome on Masonite 4{% endblock %}
+
+{% block content %}
+<div class="h-screen flex flex-col items-center justify-center">
+  <img src="/logo.png" alt="Masonite Logo" class="h-16 w-16 mb-4">
+  <div class="text-gray-500 text-5xl mb-10 tracking-wide">
+    Masonite 4
+  </div>
+
+  <div class="file-picker">
+    <input type="hidden" name="j-sukai" />
+  </div>
+  <br />
+  <div class="file-picker has-preview">
+    <input type="hidden" name="j-sukai" />
+  </div>
+</div>
+{% endblock %}
+
+{% block js %}
+{% endblock %}

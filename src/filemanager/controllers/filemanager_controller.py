@@ -83,13 +83,17 @@ class FileManagerController(Controller):
             self.manager.provider().delete_file(path)
             return self.response.json(
                 {
-                    "message": "Folder deleted...",
+                    "message": "File deleted...",
                 }
             )
         except Exception as e:
             print(e)
+
         return self.response.json(
             {
-                "message": "Folder doesn't exists!",
+                "message": "File doesn't exists!",
             }
         )
+
+    def picker(self, view: View):
+        return view.render("filemanager:picker", {})

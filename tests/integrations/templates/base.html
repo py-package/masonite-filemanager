@@ -6,19 +6,21 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="csrf-token" content="{{ csrf_token }}">
-  <title>Masonite 4</title>
+  <title>{% block title %}Masonite 4{% endblock %}</title>
   <link rel="shortcut icon" href="/favicon.ico">
   <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet" />
-
-  <link rel="stylesheet" href="/assets/css/app.css">
-
+  <link href="/filemanager-assets/picker.css" rel="stylesheet" />
+  {% block head %}
+  <!-- <link rel="stylesheet" href="/assets/css/app.css"> -->
+  {% endblock %}
 </head>
 
 <body>
-
-  @section('content')
-  <script src="/assets/js/app.js"></script>
-
+  {% block content %}{% endblock %}
+  <script src="/filemanager-assets/picker.js"></script>
+  {% block js %}
+  <!-- <script src="/assets/js/app.js"></script> -->
+  {% endblock %}
 </body>
 
 </html>
