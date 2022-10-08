@@ -8,6 +8,6 @@ class WelcomeController(Controller):
 
     def show(self, view: View):
         return view.render("welcome")
-    
+
     def form(self, view: View):
         return view.render("form")
