@@ -9,7 +9,7 @@ class FileManagerDriver:
 
         self.application = application
         self.storage = application.make("storage")
-        self.root = self.storage.disk("local")
+        self.root = self.storage.disk("local")  # type: ignore
         self.root_path = self.root.get_path("filemanager")
 
         if not os.path.exists(self.root_path):
@@ -18,7 +18,7 @@ class FileManagerDriver:
     def _get_path(self, extra=None) -> str:
         raise NotImplementedError(NOT_IMPLEMENTED_MSG)
 
-    def _get_media_type(self, file) -> str:
+    def _get_media_type(self, file):
         return mimetypes.guess_type(file.name)[0]
 
     def total_size(self) -> str:
@@ -28,6 +28,9 @@ class FileManagerDriver:
         raise NotImplementedError(NOT_IMPLEMENTED_MSG)
 
     def rename(self, path, name) -> bool:
+        raise NotImplementedError(NOT_IMPLEMENTED_MSG)
+
+    def search_files(self, query="") -> dict:
         raise NotImplementedError(NOT_IMPLEMENTED_MSG)
 
     def all_files(self) -> dict:
@@ -45,7 +48,7 @@ class FileManagerDriver:
     def delete_file(self, name) -> bool:
         raise NotImplementedError("Not implemented")
 
-    def convert_bytes(self, num) -> str:
+    def convert_bytes(self, num):
         """
         this function will convert bytes to MB.... GB... etc
         """

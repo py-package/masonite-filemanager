@@ -27,9 +27,8 @@ A simple yet powerful file management solution for your masonite application.
 - [x] Rename Files/Folders
 - [x] Delete Files/Folders
 - [x] Download Files
-- [ ] Move Files
+- [x] Search Files
 - [ ] Protect Routes
-- [ ] FileManager FormField
 - [ ] Image Editing
 - [ ] Third Party Driver Support (S3, DigitalOcean Space, etc)
 - [x] File Picker (Form)

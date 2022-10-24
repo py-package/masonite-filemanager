@@ -1,17 +1,21 @@
 from masonite.routes import Route
+from masonite.configuration import config
+from src.filemanager.controllers.filemanager_controller import FileManagerController
 
-from ..controllers.filemanager_controller import FileManagerController
-
+middleware = config('filemanager.middleware')
 
 ROUTES = Route.group(
     [
-        Route.get("/filemanager", FileManagerController.index),
-        Route.post("/filemanager", FileManagerController.upload),
-        Route.get("/filemanager/all-files", FileManagerController.all_files),
-        Route.post("/filemanager/rename", FileManagerController.rename),
-        Route.post("/filemanager/create-folder", FileManagerController.create_folder),
-        Route.post("/filemanager/delete-folder", FileManagerController.delete_folder),
-        Route.post("/filemanager/delete-file", FileManagerController.delete_file),
-        Route.get("/filemanager/picker", FileManagerController.picker),
-    ]
+        Route.get("", FileManagerController.index).name("ui"),
+        Route.post("", FileManagerController.upload).name("store"),
+        Route.get("/all-files", FileManagerController.all_files).name("list"),
+        Route.post("/rename", FileManagerController.rename).name("rename"),
+        Route.post("/create-folder", FileManagerController.create_folder).name("create_folder"),
+        Route.post("/delete-folder", FileManagerController.delete_folder).name("delete_folder"),
+        Route.post("/delete-file", FileManagerController.delete_file).name("delete_file"),
+        Route.get("/picker", FileManagerController.picker).name("picker"),
+    ],
+    prefix="/filemanager",
+    middleware=middleware,
+    name="filemanager."
 )
