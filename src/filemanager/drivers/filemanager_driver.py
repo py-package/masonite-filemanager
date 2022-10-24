@@ -45,6 +45,9 @@ class FileManagerDriver:
     def delete_file(self, name) -> bool:
         raise NotImplementedError("Not implemented")
 
+    def generate_preview(self, file):
+        raise NotImplementedError(NOT_IMPLEMENTED_MSG)
+
     def convert_bytes(self, num) -> str:
         """
         this function will convert bytes to MB.... GB... etc
@@ -81,8 +84,8 @@ class FileManagerDriver:
 
             for folder in folders:
                 if all(
-                    key in folder
-                    for key in ["name", "size", "path", "created", "modified", "total_files"]
+                        key in folder
+                        for key in ["name", "size", "path", "created", "modified", "total_files"]
                 ):
                     filtered_folders.append(folder)
 
@@ -97,8 +100,8 @@ class FileManagerDriver:
 
             for file in files:
                 if all(
-                    key in file
-                    for key in ["name", "size", "path", "created", "modified", "url", "mime"]
+                        key in file
+                        for key in ["name", "size", "path", "created", "modified", "url", "mime"]
                 ):
                     filtered_files.append(file)
             return filtered_files

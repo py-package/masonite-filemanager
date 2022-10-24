@@ -1,0 +1,89 @@
+<div x-show="layout_style == 'list'" x-init="await fetchFilesFolders()"
+     x-transition:enter="transition ease-in duration-300"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100">
+    <div class="list-header grid grid-cols-12">
+        <div class="lg:col-span-6 md:col-span-9 text-xs font-semibold">Name</div>
+        <div class="hidden lg:col-span-3 lg:block text-xs font-semibold">Last modified</div>
+        <div class="hidden lg:col-span-3 md:col-span-3 lg:block md:block text-xs text-center font-semibold">File size</div>
+    </div>
+    <section id="folders">
+        <div class="content mt-2 border border-l-0 border-r-0 border-t-0 border-gray-300">
+            <template x-for="folder in folders">
+                <div data-dz-drop @dragover.prevent @drop="dragDrop($refs.folder)" @dragenter="dragEnter($refs.folder)" @dragleave="dragLeave($refs.folder)" tabindex="-1" x-data="{folder,show: false, menupos: ''}" class="cursor-default relative focus:bg-blue-100 border p-1 border-l-0 border-r-0 border-b-0 border-gray-300" @click.prevent="" @dblclick="openFolder(folder.name)" x-on:contextmenu="$event.preventDefault(); menupos = context.init($refs.contextmenu); show=true">
+
+                    <div x-ref="folder" :data-path="folder.path" class="pointer-events-none grid grid-cols-12 p-2 outline-2 outline-blue-400 outline-offset-2">
+                        <div class="lg:col-span-6 md:col-span-9">
+                            <div class="text-gray-500 text-xs font-semibold overflow-ellipsis whitespace-nowrap overflow-hidden"><em class="fas fa-folder text-orange-300 px-3"></em><span x-text="folder.name"></span></div>
+                        </div>
+                        <div class="hidden lg:col-span-3 text-xs lg:block">
+                            <div class="text-xs text-gray-500 overflow-ellipsis whitespace-nowrap overflow-hidden" x-text="folder.modified"></div>
+                        </div>
+                        <div class="hidden lg:col-span-3 md:col-span-3 lg:block md:block">
+                            <div class="text-xs text-gray-500 text-center overflow-ellipsis whitespace-nowrap overflow-hidden">-</div>
+                        </div>
+                        <div x-ref="contextmenu" x-show="show" class="fixed bg-gray-100 rounded-md w-44 z-1000" :style="{'left': menupos.x, 'top': menupos.y}" @click.away="show = false"
+                             x-transition:enter="transition ease duration-100 transform"
+                             x-transition:enter-start="opacity-0 scale-90 translate-y-1"
+                             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                             x-transition:leave="transition ease duration-100 transform"
+                             x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                             x-transition:leave-end="opacity-0 scale-90 translate-y-1">
+                            <div class="bg-white overflow-auto rounded-lg shadow-md w-full py-2 border border-gray-300 text-gray-800 text-xs">
+                                <ul class="list-reset">
+                                    <li>
+                                        <button class="px-4 w-full py-1 flex hover:bg-gray-100 no-underline hover:no-underline transition-colors duration-100" @click.prevent="show=false; openRenameForm(folder.name, folder.path)">Rename Folder
+                                        </button>
+                                        <button class="px-4 w-full py-1 flex hover:bg-gray-100 no-underline hover:no-underline transition-colors duration-100 text-red-500" @click.prevent="show=false; deleteFolder(folder.path)">Delete Folder
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </section>
+    <section id="files" class="mb-10">
+        <div class="content grid grid-cols-1 z-10">
+            <!-- content goes here -->
+            <template x-for="[key, file] in Object.entries(files)">
+                <div tabindex="-1" :class="{'bg-blue-100': file_selected}" x-data="{show: false, modal: false, menupos: '', file_selected: false}" @click.prevent="selectFile($refs.dragged.dataset.key);file_selected=true" @click.away="details.load(false);if (!multiselect) removeSelected($refs.dragged.dataset.key),file_selected=false" @dblclick="if(!multiselect) modal=true, modalOpen=true" x-on:contextmenu="if(!modalOpen){$event.preventDefault(); menupos = context.init($refs.contextmenu); show=true}">
+                    <div class="cursor-default border border-l-0 border-r-0 border-t-0 border-gray-300 p-1">
+                        <div class="grid grid-cols-12 mt-1 mb-1">
+                            <div class="lg:col-span-6 md:col-span-9 overflow-hidden">
+                                <div draggable="true" data-dz-drag @dragstart="dragStart($refs.dragged);dragging=true" @dragend="dragEnd;dragging=false" class="text-gray-500 font-semibold overflow-ellipsis whitespace-nowrap overflow-hidden">
+                                    <span class="pointer-events-none px-3" x-html="getFileIcon(file)"></span><span class="text-xs" x-text="file.name + file.extension"></span></div>
+                            </div>
+                            <div class="hidden h-full lg:col-span-3 text-xs lg:block mt-1 mb-1">
+                                <div class="text-xs text-gray-500 overflow-ellipsis whitespace-nowrap overflow-hidden" x-text="file.modified"></div>
+                            </div>
+                            <div class="hidden lg:col-span-3 md:col-span-3 lg:block md:block mt-1 mb-1">
+                                <div class="text-xs text-gray-500 text-center overflow-ellipsis whitespace-nowrap overflow-hidden" x-text="file.size"></div>
+                            </div>
+                        </div>
+
+                        <div x-ref="contextmenu" x-show="show" class="fixed bg-gray-100 rounded-md w-44 z-1000" :style="{'left': menupos.x, 'top': menupos.y}" @click.away="show = false" x-transition:enter="transition ease duration-100 transform" x-transition:enter-start="opacity-0 scale-90 translate-y-1" x-transition:enter-end="opacity-100 scale-100 translate-y-0" x-transition:leave="transition ease duration-100 transform" x-transition:leave-start="opacity-100 scale-100 translate-y-0" x-transition:leave-end="opacity-0 scale-90 translate-y-1">
+                            <div class="bg-white overflow-auto rounded-lg shadow-md w-full relative z-10 py-2 border border-gray-300 text-gray-800 text-xs">
+                                <ul class="list-reset">
+                                    <li>
+                                        <button class="px-4 w-full py-1 flex hover:bg-gray-100 no-underline hover:no-underline transition-colors duration-100" @click.prevent="show=false; openRenameForm(file.name, file.path)">Rename</button>
+                                        <button class="px-4 w-full py-1 flex hover:bg-gray-100 no-underline hover:no-underline transition-colors duration-100" @click.prevent="show=false; downloadFile(file.name, file.url)">Download</button>
+                                        <button class="px-4 w-full py-1 flex hover:bg-gray-100 no-underline hover:no-underline transition-colors duration-100 text-red-500" @click.prevent="show=false; deleteFile(file.path)">Delete File</button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div x-ref="dragged" :data-key="key" class="hidden m-3 w-40 bg-transparent ease-in-out duration-1 rounded-md transition-all overflow-ellipsis">
+                            <div class="py-3 border border-gray-300 rounded-md">
+                                <div class="text-xs text-gray-500 font-semibold overflow-ellipsis whitespace-nowrap overflow-hidden"><span class="px-3" x-html="getFileIcon(file)"></span><span x-text="file.name"></span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div x-html="generateModal(file)"></div>
+                </div>
+            </template>
+        </div>
+    </section>
+</div>
