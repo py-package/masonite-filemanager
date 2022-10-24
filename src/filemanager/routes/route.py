@@ -2,7 +2,7 @@ from masonite.routes import Route
 from masonite.configuration import config
 from src.filemanager.controllers.filemanager_controller import FileManagerController
 
-middleware = config('filemanager.middleware')
+middleware = config("filemanager.middleware")
 
 ROUTES = Route.group(
     [
@@ -17,5 +17,5 @@ ROUTES = Route.group(
     ],
     prefix="/filemanager",
     middleware=middleware,
-    name="filemanager."
+    name="filemanager.",
 )
