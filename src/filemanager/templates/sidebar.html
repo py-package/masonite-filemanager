@@ -1,5 +1,4 @@
-<aside
-    class="sidebar fixed p-4 w-64 border-r border-gray-300 h-screen overflow-x-auto text-sm transform -translate-x-full md:translate-x-0 transition-transform duration-150 ease-in">
+<aside class="sidebar fixed p-4 w-64 h-screen overflow-x-auto text-sm transform -translate-x-full md:translate-x-0 transition-transform duration-150 ease-in">
     <button @click="openCreateForm" class="w-full p-1 bg-blue-500 text-white font-semibold rounded">New</button>
 
     <div class="mt-8 uppercase text-xs font-semibold text-gray-500">My Drive</div>
@@ -21,5 +20,12 @@
             <span class="ml-3 font-semibold mr-1" x-html="totalSize"></span>
         </div>
     </div>
-
+    <footer class="fixed bottom-2 footer px-4">
+        <div class="footer-content">
+            <p class="text-sm text-gray-600 text-center">
+                © Filemanager. All rights reserved.
+                <a href="">by Yubaraj Shrestha</a>
+            </p>
+        </div>
+    </footer>
 </aside>

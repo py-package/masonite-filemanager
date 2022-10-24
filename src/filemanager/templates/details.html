@@ -1,0 +1,22 @@
+<aside x-cloak x-show="show_details" class="fixed right-0  duration-400 mt-11 py-4 px-1 w-80 border-gray-300 bg-black/5 h-screen overflow-x-auto text-sm"
+       x-transition:enter="transition -right-80 ease-in"
+       x-transition:enter-start="translate-x-0"
+       x-transition:enter-end="-translate-x-80"
+       x-transition:leave="transition ease-out"
+       x-transition:leave-start="translate-x-0"
+       x-transition:leave-end="translate-x-80">
+    <div x-show="details.file"
+         x-transition:enter="transition ease-in duration-130"
+         x-transition:enter-start="opacity-10 h-10"
+         x-transition:enter-end="opacity-100 h-full">
+        <h2 class="text-center text-lg mb-8"><span class="px-3" x-html="getFileIcon(details.file)"></span><span x-text="details.file.name + details.file.extension || ''"></span></h2>
+        <div class="max-h-40" x-html="getDetailPreview(details.file)"></div>
+        <ul class="mt-12 p-2">
+            <li class="py-2 text-xs">Type: <span x-text="details.file.mime"></span></li>
+            <li class="py-2 text-xs">Size: <span x-text="details.file.size"></span></li>
+            <li class="py-2 text-xs">Modified: <span x-text="details.file.modified"></span></li>
+            <li class="py-2 text-xs">Created: <span x-text="details.file.created"></span></li>
+        </ul>
+    </div>
+
+</aside>
