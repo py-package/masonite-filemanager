@@ -44,7 +44,7 @@ class LocalDriver(FileManagerDriver):
         if folder:
             path = "filemanager/{}".format(folder.replace(",", "/"))
         for key, file in files.items():
-            self.storage.disk("local").put_file(path, file, filesystem.splitext(file.name)[0].rstrip())
+            self.storage.disk("local").put_file(path, file, os.path.splitext(file.name)[0].rstrip())
 
     def create_folder(self, name) -> bool:
         """Create a folder in the filemanager directory"""
@@ -100,7 +100,7 @@ class LocalDriver(FileManagerDriver):
     def generate_previews(self, files):
         from pdf2image import convert_from_path
         for key, file in files.items():
-            root, ext = filesystem.splitext(file.name)
+            root, ext = os.path.splitext(file.name)
             if ext[1:] == 'pdf':
                 request = self.application.make("request")
                 folder = request.input("folder", None)
@@ -112,7 +112,7 @@ class LocalDriver(FileManagerDriver):
                     # if the preview directory is not present then create it.
                     os.makedirs(preview_folder)
                 pages = convert_from_path(os.path.join(self.root_path, file.name), 100)
-                pages[0].save(preview_folder + filesystem.splitext(file.name)[0] + '.jpg', 'JPEG')
+                pages[0].save(preview_folder + os.path.splitext(file.name)[0] + '.jpg', 'JPEG')
 
     def file_info(self, file):
         if isinstance(file, str):
@@ -145,8 +145,8 @@ class LocalDriver(FileManagerDriver):
                 file_url = file_url.replace("\\", "/")
 
                 file_item = {
-                    "name": name if item.is_dir() else filesystem.splitext(item.name)[0],
-                    "extension": 'dir' if item.is_dir() else filesystem.splitext(item.name)[1],
+                    "name": name if item.is_dir() else os.path.splitext(item.name)[0],
+                    "extension": 'dir' if item.is_dir() else os.path.splitext(item.name)[1],
                     "size": size,
                     "created": created_at,
                     "modified": modified_at,
