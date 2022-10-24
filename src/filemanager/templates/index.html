@@ -10,7 +10,6 @@
 		crossorigin="anonymous" referrerpolicy="no-referrer" />
 	<title>FileManager</title>
 	<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14"></script>
 	<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
 	<script src="/filemanager-assets/dropzone.min.js"></script>
@@ -38,14 +37,17 @@
 			<div class="main-content relative flex flex-col flex-grow p-4">
 				<div class="fixed w-full flex -ml-4 h-12 flex items-center border-b bg-gray-100 border-gray-300 -mt-4"
 					style="z-index: 1;">
-					<span class="ml-4"><em class="fa fa-search"></em></span>
-					<input type="text"
-						class="w-full bg-transparent block focus:outline-none focus:border-none px-2 text-sm"
-						placeholder="Search for files and folders" />
+					<span class="ml-4 flex-none"><em class="fa fa-search"></em></span>
+					<input type="text" x-model="query" x-on:input.debounce="searchFilesFolders"
+						class="flex-grow bg-transparent block focus:outline-none focus:border-none px-2 text-sm"
+						placeholder="Search for files and folders" @keyup.enter="searchFilesFolders" />
+					<!-- <span class="flex-none -ml-64">
+						<input type="checkbox" /> Everywhere
+					</span> -->
 				</div>
 				<div class="pt-12 overflow-y-hidden overflow-x-auto">
-					<div class="text-xl mb-6">All Files</div>
-					<section class="mb-10" id="folders">
+					<div class="text-xl mb-6" x-text="query.length ? 'Search Result' : 'All Files'"></div>
+					<section class="mb-10" id="folders" x-show="!query.length">
 						<div class="text-xs uppercase text-gray-500 font-semibold">
 							Folders
 						</div>
@@ -130,6 +132,7 @@
 		}
 
 		const filemanager = {
+			query: '',
 			renameForm: {
 				name: '',
 				path: '',
@@ -158,17 +161,19 @@
 				});
 			},
 
-			getEndPoints(endpoint) {
+			async getEndPoints(endpoint) {
 				const query = window.location.href.split("?");
 				if (query.length > 1) {
-					endpoint += `?${query[1]}`;
+					endpoint += `?${query[1]}&query=${this.query}`;
+				} else {
+					endpoint += `?query=${this.query}`
 				}
 				return endpoint
 			},
 
 			async fetchFilesFolders() {
 				try {
-					const response = await axios.get(this.getEndPoints('/filemanager/all-files'));
+					const response = await axios.get(await this.getEndPoints(`/filemanager/all-files`));
 					this.renderUI(response.data);
 					this.totalSize = response.data.total_size;
 				} catch (error) {
@@ -190,11 +195,11 @@
 			async createFolder() {
 				if (!this.createForm.name || this.createForm.name.length == 0) return;
 				try {
-					const response = await axios.post(this.getEndPoints('/filemanager/create-folder'), {
+					const response = await axios.post(await this.getEndPoints('/filemanager/create-folder'), {
 						name: this.createForm.name,
 					});
 					this.fetchFilesFolders();
-					this.resetCreateForm();
+					await this.resetCreateForm();
 				} catch (error) {
 					console.log(error);
 				}
@@ -218,18 +223,18 @@
 			async renameFileFolder() {
 				if (!this.renameForm.name || this.renameForm.name.length == 0) return;
 				try {
-					const response = await axios.post(this.getEndPoints('/filemanager/rename'), {
+					const response = await axios.post(await this.getEndPoints('/filemanager/rename'), {
 						name: this.renameForm.name,
 						path: this.renameForm.path,
 					});
 					this.fetchFilesFolders();
-					this.resetRenameForm();
+					await this.resetRenameForm();
 				} catch (error) {
 					console.log(error);
 				}
 			},
 
-			resetRenameForm() {
+			async resetRenameForm() {
 				this.renameForm = {
 					name: '',
 					path: '',
@@ -237,7 +242,7 @@
 				}
 			},
 
-			resetCreateForm() {
+			async resetCreateForm() {
 				this.createForm = {
 					name: '',
 					visibility: false,
@@ -246,7 +251,7 @@
 
 			async deleteFolder(path) {
 				try {
-					const response = await axios.post(this.getEndPoints('/filemanager/delete-folder'), {
+					const response = await axios.post(await this.getEndPoints('/filemanager/delete-folder'), {
 						path: path,
 					});
 					this.fetchFilesFolders();
@@ -257,7 +262,7 @@
 
 			async deleteFile(path) {
 				try {
-					const response = await axios.post(this.getEndPoints('/filemanager/delete-file'), {
+					const response = await axios.post(await this.getEndPoints('/filemanager/delete-file'), {
 						path: path,
 					});
 					this.fetchFilesFolders();
@@ -343,6 +348,10 @@
 				}
 			},
 
+			async searchFilesFolders() {
+				await this.fetchFilesFolders();
+			},
+
 			async renderUI(FileFolders) {
 				let FileHtml = "";
 				let FolderHtml = "";
@@ -382,38 +391,45 @@
 				if (FileFolders.folders.length > 0) {
 					FileFolders.folders.forEach((folder) => {
 						FolderHtml += `
-						<div x-data="{show: false}" class="rounded cursor-pointer bg-white focus:bg-gray-200 hover:shadow relative border border-gray-200 p-2 transition duration-200" x-on:contextmenu="$event.preventDefault(); show=true">
-							<div class="grid grid-cols-5 gap-4 items-center" x-on:click.prevent="openFolder('${folder.name}')">
-								<div class=""><em class="fas fa-folder fa-3x"></em></div>
-								<div class="ml-4 relative col-span-4 flex flex-col">
-									<div class="text-xs text-gray-500 font-semibold overflow-ellipsis whitespace-nowrap overflow-hidden">${folder.name}</div>
-									<span class="text-xs text-gray-500">${folder.total_files} ${folder.total_files > 1 ? "files" : "file"
+							<div x-data="{show: false}" class="rounded cursor-pointer bg-white focus:bg-gray-200 hover:shadow relative border border-gray-200 p-2 transition duration-200" x-on:contextmenu="$event.preventDefault(); show=true">
+								<div class="grid grid-cols-5 gap-4 items-center" x-on:click.prevent="openFolder('${folder.name}')">
+									<div class=""><em class="fas fa-folder fa-3x"></em></div>
+									<div class="ml-4 relative col-span-4 flex flex-col">
+										<div class="text-xs text-gray-500 font-semibold overflow-ellipsis whitespace-nowrap overflow-hidden">${folder.name}</div>
+										<span class="text-xs text-gray-500">${folder.total_files} ${folder.total_files > 1 ? "files" : "file"
 							}, ${folder.size}</span>
+									</div>
+								</div>
+								<div x-show="show" class="absolute right-5 top-2 py-1 bg-gray-100 rounded-md w-44 z-1" @click.away="show = false" x-transition:enter="transition ease duration-100 transform" x-transition:enter-start="opacity-0 scale-90 translate-y-1" x-transition:enter-end="opacity-100 scale-100 translate-y-0" x-transition:leave="transition ease duration-100 transform" x-transition:leave-start="opacity-100 scale-100 translate-y-0" x-transition:leave-end="opacity-0 scale-90 translate-y-1">
+									<div class="bg-white overflow-auto rounded-lg shadow-md w-full relative z-10 py-2 border border-gray-300 text-gray-800 text-xs">
+										<ul class="list-reset">
+											<li>
+												<button class="px-4 w-full py-1 flex hover:bg-gray-100 no-underline hover:no-underline transition-colors duration-100" @click.prevent="show=false; openRenameForm('${folder.name}', '${folder.path}')">Rename Folder</button>
+												<button class="px-4 w-full py-1 flex hover:bg-gray-100 no-underline hover:no-underline transition-colors duration-100 text-red-500" @click.prevent="show=false; deleteFolder('${folder.path}')">Delete Folder</button>
+											</li>
+										</ul>
+									</div>
 								</div>
 							</div>
-							<div x-show="show" class="absolute right-5 top-2 py-1 bg-gray-100 rounded-md w-44 z-1" @click.away="show = false" x-transition:enter="transition ease duration-100 transform" x-transition:enter-start="opacity-0 scale-90 translate-y-1" x-transition:enter-end="opacity-100 scale-100 translate-y-0" x-transition:leave="transition ease duration-100 transform" x-transition:leave-start="opacity-100 scale-100 translate-y-0" x-transition:leave-end="opacity-0 scale-90 translate-y-1">
-								<div class="bg-white overflow-auto rounded-lg shadow-md w-full relative z-10 py-2 border border-gray-300 text-gray-800 text-xs">
-									<ul class="list-reset">
-										<li>
-											<button class="px-4 w-full py-1 flex hover:bg-gray-100 no-underline hover:no-underline transition-colors duration-100" @click.prevent="show=false; openRenameForm('${folder.name}', '${folder.path}')">Rename Folder</button>
-											<button class="px-4 w-full py-1 flex hover:bg-gray-100 no-underline hover:no-underline transition-colors duration-100 text-red-500" @click.prevent="show=false; deleteFolder('${folder.path}')">Delete Folder</button>
-										</li>
-									</ul>
-								</div>
-							</div>
-						</div>
-					`;
+						`;
 					});
 				} else {
 					FolderHtml = `
-					<div class="text-left text-gray-500">
-						<p class="text-xs mt-3">No Folders Found</p>
-					</div>
-				`;
+						<div class="text-left text-gray-500">
+							<p class="text-xs mt-3">No Folders Found</p>
+						</div>
+					`;
 				}
 
-				document.querySelector("#files .content").innerHTML = FileHtml;
-				document.querySelector("#folders .content").innerHTML = FolderHtml;
+				const FileContainer = document.querySelector("#files .content");
+				if (FileContainer) {
+					FileContainer.innerHTML = FileHtml;
+				}
+
+				const FolderContainer = document.querySelector("#folders .content");
+				if (FolderContainer) {
+					FolderContainer.innerHTML = FolderHtml;
+				}
 			}
 		}
 	</script>
