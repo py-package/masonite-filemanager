@@ -159,3 +159,49 @@ class LocalDriver(FileManagerDriver):
                     data.get("files").append(file_item)
 
         return self.validate(data)
+
+    def search_files(self, query=""):
+        data = {
+            "folders": [],
+            "files": [],
+            "total_size": self.total_size(),
+        }
+
+        path = self._get_path()
+
+        with os.scandir(path) as entries:
+            for item in entries:
+                name = item.name
+                byte_size = (
+                    item.stat().st_size
+                    if item.is_file()
+                    else sum(file.stat().st_size for file in Path(item.path).rglob("*"))
+                )
+                size = self.convert_bytes(byte_size)
+                created_at = time.ctime(item.stat().st_ctime)
+                modified_at = time.ctime(item.stat().st_mtime)
+
+                file_url = item.path.replace(self.root_path, "/filemanager-uploads")
+                file_url = file_url.replace("\\", "/")
+
+                file_item = {
+                    "name": name if item.is_dir() else os.path.splitext(item.name)[0],
+                    "extension": "dir" if item.is_dir() else os.path.splitext(item.name)[1],
+                    "size": size,
+                    "created": created_at,
+                    "modified": modified_at,
+                    "path": item.path,
+                }
+
+                if item.is_dir() and query == "":
+                    file_item["total_files"] = len(os.listdir(item.path))
+                    data.get("folders", []).append(file_item)
+                else:
+                    file_item["url"] = file_url
+                    file_item["mime"] = self._get_media_type(item)
+                    if query == "":
+                        data.get("files", []).append(file_item)
+                    elif query in file_item["name"]:
+                        data.get("files", []).append(file_item)
+
+        return self.validate(data)

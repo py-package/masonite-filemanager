@@ -30,6 +30,9 @@ class FileManagerDriver:
     def rename(self, path, name) -> bool:
         raise NotImplementedError(NOT_IMPLEMENTED_MSG)
 
+    def search_files(self, query="") -> dict:
+        raise NotImplementedError(NOT_IMPLEMENTED_MSG)
+
     def all_files(self) -> dict:
         raise NotImplementedError(NOT_IMPLEMENTED_MSG)
 

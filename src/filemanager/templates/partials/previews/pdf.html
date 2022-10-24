@@ -1,5 +1,6 @@
 {% if config('filemanager.generate_previews') %}
-<div :style="{'background-image': 'url(\'/previews/{{file.name}}.jpg\')', 'background-position':'center','background-size':'200%','background-repeat':'no-repeat'}" class="w-full h-full overflow-hidden"></div>
+<div :style="{'background-image': 'url(\'/previews/{{file.name}}.jpg\')', 'background-position':'center','background-size':'200%','background-repeat':'no-repeat'}"
+    class="w-full h-full overflow-hidden"></div>
 {% else %}
 <div class="flex items-center justify-center w-full h-full rounded">
     <i class="fas fa-file-pdf text-4xl text-red-700"></i>

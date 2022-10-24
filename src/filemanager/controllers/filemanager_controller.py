@@ -21,6 +21,9 @@ class FileManagerController(Controller):
         return self.manager.provider().file_info(file)
 
     def all_files(self):
+        query = self.request.input("query", "")
+        if query:
+            return self.manager.provider().search_files(query=query)
         return self.manager.provider().all_files()
 
     def upload(self):

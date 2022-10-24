@@ -2,13 +2,13 @@
 <html lang="en-US">
 
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="csrf-token" content="{{ csrf_token }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
-          integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ=="
-          crossorigin="anonymous" referrerpolicy="no-referrer"/>
+        integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
     <title>FileManager</title>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14"></script>
@@ -16,10 +16,10 @@
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <script src="/filemanager-assets/dropzone.min.js"></script>
-    <link href="/filemanager-assets/dropzone.min.css" rel="stylesheet" type="text/css"/>
+    <link href="/filemanager-assets/dropzone.min.css" rel="stylesheet" type="text/css" />
 
     <script src="/filemanager-assets/glightbox.min.js"></script>
-    <link href="/filemanager-assets/glightbox.min.css" rel="stylesheet" type="text/css"/>
+    <link href="/filemanager-assets/glightbox.min.css" rel="stylesheet" type="text/css" />
     <style>
         [x-cloak] {
             display: none !important;
@@ -27,588 +27,605 @@
     </style>
 </head>
 
-<body>
-<div class="fixed w-full flex h-12 z-10 justify-between border-b border-gray-300 items-center bg-gray-100">
-    <span class="font-bold uppercase px-4">FileManager</span>
-    <div class="fixed w-full flex mx-64 h-12 items-center justify-center border-b bg-gray-100 border-gray-300">
-        <span class="ml-4"><em class="fa fa-search"></em></span>
-        <input type="text"
-               class="w-full bg-transparent block focus:outline-none focus:border-none px-2 text-sm"
-               placeholder="Search for files and folders"/>
-    </div>
-</div>
-<div class="flex flex-row min-h-screen overflow-hidden bg-gray-100 text-gray-800 pt-14" x-data="filemanager">
-    <!-- Include Sidebar -->
-    @include 'sidebar.html'
-    <main x-data="{modalOpen: false, dragging: false, layout_style:$persist(layout),show_details: $persist(details.show)}" class="main flex flex-col bg-transparent flex-grow transition-all duration-150 ease-in" id="dropzone-container">
-        <div class="main-content flex flex-col flex-grow ml-64">
-            <div class="bg-gray-100 text-xl pb-2 px-2 border-b border-gray-300 flex flex-1 items-center z-1000">
-                <ul class="flex">
-                    <li><a href="/filemanager">All Files</a></li>
-                    {% if request().input('folder') %}
-                    {% for folder in request().input('folder').split('/') %}
-                    <li><i class="fas fa-chevron-right px-4"></i><a href="?folder={{folder}}">{{folder}}</a></li>
-                    {% endfor %}
-                    {% endif %}
-                </ul>
-                <div class="flex flex-1 justify-end">
-                    <button @click="switchLayout()" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold p-2 mx-2 rounded inline-flex items-center self-end">
-                        <i class="fas" :class="[layout_style == 'grid' ? 'fa-list' : 'fa-th']"></i>
-                    </button>
-                    <button @click.prevent="show_details=!show_details" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold p-2 mx-2 rounded inline-flex items-center self-end">
-                        <i class="fas fa-info-circle"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="mt-2 h-full" :class="{'mr-80': show_details}">
-                <div x-cloak id="folders-files" class="max-h-[50rem] overflow-y-auto">
-                    @include 'partials/grid.html'
-                    @include 'partials/list.html'
-                </div>
-                <div x-data="{minimize: false}" id="preview-container" class="fixed border rounded-md bottom-5 right-5 w-80 px-2 shadow-md bg-white invisible" :class="{'right-80': show_details}">
-                    <div class="flex flex-1 items-center">
-                        <h3 class="py-2" data-dz-status></h3>
-                        <div class="flex flex-1 items-center justify-end">
-                            <i id="controller" class="fas fa-chevron-down px-2" @click="minimize=!minimize"></i>
-                            <i id="close" class="fas fa-times-circle px-2" @click="document.getElementById('preview-container').classList.add('invisible')" data-dz-closepreviews></i>
-                        </div>
-                    </div>
-                    <div id="previews" class="max-h-40 m-0 relative overflow-auto" :class="{'hidden': minimize}">
-                        <div class="flex items-center p-2" id="dz-template">
-                            <div class="text-xs w-[10%]">
-                                <span class="dz-size" data-dz-size></span>
-                            </div>
-                            <div class="w-52" data-dz-thumbnail>
-                                <div class="text-xs overflow-ellipsis whitespace-nowrap overflow-hidden">
-                                    <span data-dz-name></span>
-                                </div>
-                                <div class="progress">
-                                    <div class="determinate bg-blue-400 h-1 w-0" data-dz-uploadprogress></div>
-                                </div>
-                                <div class="text-red-500 text-xs"><span data-dz-errormessage></span></div>
-                            </div>
-                            <div class="pl-4" data-dz-complete>
-                                <a title="Cancel upload" class="flex items-center justify-center"><i class="px-3 py-1 cursor-pointer text-base fas fa-times" data-dz-cancel></i></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<body x-data="filemanager">
+    <div class="fixed w-full flex h-12 z-10 justify-between border-b border-gray-300 items-center bg-gray-100">
+        <span class="font-bold uppercase px-4">FileManager</span>
+        <div class="fixed w-full flex mx-64 h-12 items-center justify-center border-b bg-gray-100 border-gray-300">
+            <span class="ml-4"><em class="fa fa-search"></em></span>
+            <input type="text" x-model="query" @input.debounce.300ms="searchFilesFolders"
+                class="w-full bg-transparent block focus:outline-none focus:border-none px-2 text-sm"
+                placeholder="Search for files and folders" />
         </div>
-        @include 'details.html'
-    </main>
-    <!-- Include folder-form -->
-    @include 'partials/create_form.html'
+    </div>
+    <div class="flex flex-row min-h-screen overflow-hidden bg-gray-100 text-gray-800 pt-14">
+        <!-- Include Sidebar -->
+        @include 'sidebar.html'
+        <main
+            x-data="{modalOpen: false, dragging: false, layout_style:$persist(layout),show_details: $persist(details.show)}"
+            class="main flex flex-col bg-transparent flex-grow transition-all duration-150 ease-in"
+            id="dropzone-container">
+            <div class="main-content flex flex-col flex-grow ml-64">
+                <div class="bg-gray-100 text-xl pb-2 px-2 border-b border-gray-300 flex flex-1 items-center z-1000">
+                    <ul class="flex">
+                        <li><a href="/filemanager">All Files</a></li>
+                        {% if request().input('folder') %}
+                        {% for folder in request().input('folder').split('/') %}
+                        <li><i class="fas fa-chevron-right px-4"></i><a href="?folder={{folder}}">{{folder}}</a></li>
+                        {% endfor %}
+                        {% endif %}
+                    </ul>
+                    <div class="flex flex-1 justify-end">
+                        <button @click="switchLayout()"
+                            class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold p-2 mx-2 rounded inline-flex items-center self-end">
+                            <i class="fas" :class="[layout_style == 'grid' ? 'fa-list' : 'fa-th']"></i>
+                        </button>
+                        <button @click.prevent="show_details=!show_details"
+                            class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold p-2 mx-2 rounded inline-flex items-center self-end">
+                            <i class="fas fa-info-circle"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="mt-2 h-full" :class="{'mr-80': show_details}">
+                    <div x-cloak id="folders-files" class="max-h-[50rem] overflow-y-auto">
+                        @include 'partials/grid.html'
+                        @include 'partials/list.html'
+                    </div>
+                    <div x-data="{minimize: false}" id="preview-container"
+                        class="fixed border rounded-md bottom-5 right-5 w-80 px-2 shadow-md bg-white invisible"
+                        :class="{'right-80': show_details}">
+                        <div class="flex flex-1 items-center">
+                            <h3 class="py-2" data-dz-status></h3>
+                            <div class="flex flex-1 items-center justify-end">
+                                <i id="controller" class="fas fa-chevron-down px-2" @click="minimize=!minimize"></i>
+                                <i @click="document.getElementById('preview-container').classList.add('invisible')"
+                                    id="close" class="fas fa-times-circle px-2" data-dz-closepreviews></i>
+                            </div>
+                        </div>
+                        <div id="previews" class="max-h-40 m-0 relative overflow-auto" :class="{'hidden': minimize}">
+                            <div class="flex items-center p-2" id="dz-template">
+                                <div class="text-xs w-[10%]">
+                                    <span class="dz-size" data-dz-size></span>
+                                </div>
+                                <div class="w-52" data-dz-thumbnail>
+                                    <div class="text-xs overflow-ellipsis whitespace-nowrap overflow-hidden">
+                                        <span data-dz-name></span>
+                                    </div>
+                                    <div class="progress">
+                                        <div class="determinate bg-blue-400 h-1 w-0" data-dz-uploadprogress></div>
+                                    </div>
+                                    <div class="text-red-500 text-xs"><span data-dz-errormessage></span></div>
+                                </div>
+                                <div class="pl-4" data-dz-complete>
+                                    <a title="Cancel upload" class="flex items-center justify-center"><i
+                                            class="px-3 py-1 cursor-pointer text-base fas fa-times"
+                                            data-dz-cancel></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @include 'details.html'
+        </main>
+        <!-- Include folder-form -->
+        @include 'partials/create_form.html'
 
-    <!-- Include folder-form -->
-    @include 'partials/rename_form.html'
+        <!-- Include folder-form -->
+        @include 'partials/rename_form.html'
 
-</div>
-<script>
-    axios.interceptors.request.use(function (config) {
-        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
-        if (csrfToken) config.headers['X-CSRF-TOKEN'] = csrfToken;
-        return config;
-    }, function (error) {
-        return Promise.reject(error);
-    });
-
-    let currentContext = null;
-    const SetupVideoPreview = () => {
-        const videos = document.getElementsByTagName("video");
-
-        const startPreview = (video) => {
-            video.muted = true;
-            video.currentTime = 1;
-            video.playbackRate = 0.5;
-            video.play();
-        }
-
-        const stopPreview = (video) => {
-            video.currentTime = 0;
-            video.playbackRate = 1;
-            video.pause();
-        }
-
-        const listen = (video) => {
-            let previewTimeout = null;
-            video.addEventListener("mouseenter", () => {
-                startPreview(video);
-                previewTimeout = setTimeout(stopPreview, 4000);
-            });
-
-            video.addEventListener("mouseleave", () => {
-                clearTimeout(previewTimeout);
-                previewTimeout = null;
-                stopPreview(video);
-            });
-        }
-
-        if (videos.length) {
-            for (let i = 0; i < videos.length; i++) {
-                listen(videos[i]);
-            }
-        }
-    }
-
-    const SetupLigthBox = () => {
-        const lightbox = GLightbox({
-            touchNavigation: true,
-            loop: true,
-            autoplayVideos: true
+    </div>
+    <script>
+        axios.interceptors.request.use(function (config) {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+            if (csrfToken) config.headers['X-CSRF-TOKEN'] = csrfToken;
+            return config;
+        }, function (error) {
+            return Promise.reject(error);
         });
-    }
 
-    const $fm = filemanager = {
-        renameForm: {
-            name: '',
-            path: '',
-            visibility: false,
-        },
-        createForm: {
-            name: '',
-            visibility: false,
-        },
-        dzone: null,
-        totalSize: '0 byte',
-        context: {
-            current: null,
-            init(el) {
-                $fm.context.stash(el);
-                return $fm.context.position(el);
-            },
-            position(el) {
-                // convert html string into DOM
-                const container = el.getBoundingClientRect();
-                const pointer_x = event.clientX;
-                const pointer_y = event.clientY;
-                let cords = {y: pointer_y + 'px', x: pointer_x + 'px'}
-                if (pointer_x + container.width > window.innerWidth) {
-                    cords.x = pointer_x - container.width + 'px';
-                }
-                if (pointer_y + container.height > window.innerHeight) {
-                    cords.y = pointer_y - container.height + 'px';
-                }
-                return cords;
-            },
-            stash(el) {
-                if ($fm.context.current == el) {
-                    return;
-                } else if ($fm.context.current) {
-                    $fm.context.current._x_doHide();
-                }
-                $fm.context.current = el;
-                $fm.context.current._x_doShow();
-            },
-        },
-        handle: null,
-        multiselect: false,
-        modifiers: ['Shift', 'Control'],
-        selected: [],
-        layout: 'grid',
-        details: {
-            show: false,
-            file: false,
-            init() {
-                this.show = $fm.$persist(false)
-            },
-            load(file) {
-                this.file = file
-            }
-        },
+        let currentContext = null;
+        const SetupVideoPreview = () => {
+            const videos = document.getElementsByTagName("video");
 
-        async init() {
-            //setup preview node for dropzone
-            let previewNode = document.querySelector("#dz-template");
-            previewNode.id = "";
-            let previewTemplate = previewNode.parentNode.innerHTML;
-            previewNode.parentNode.removeChild(previewNode);
-            this.dzone = new Dropzone("main#dropzone-container", {
-                url: window.location.href,
-                headers: {"X-CSRF-TOKEN": "{{ csrf_token }}"},
-                clickable: false,
-                paramName: 'files',
-                previewTemplate: previewTemplate,
-                previewsContainer: "#previews",
-                maxFilesize: 1500,
-                uploadMultiple: true,
-                parallelUploads: 20,
-                init: function () {
-                    const $this = this;
-                    document.addEventListener('click', function (event) {
-                        if (!event.target.matches('[data-dz-closepreviews]')) return;
-                        event.preventDefault();
-                        $this.removeAllFiles(true);
-                    }, false);
-                }
-            });
-            document.addEventListener("keydown", this.keyDownHandler, false)
-            document.addEventListener("keyup", this.keyUpHandler, false)
-            this.dzoneEvents();
-            SetupVideoPreview();
-            SetupLigthBox();
-        },
-
-        async dzoneEvents() {
-            this.dzone.on("addedfile", function (file) {
-                document.getElementById('preview-container').classList.remove('invisible');
-                const dzone = this;
-                file.previewElement.addEventListener('click', function (event) {
-                    if (!event.target.matches('[data-dz-cancel]')) return;
-                    event.preventDefault();
-                    dzone.cancelUpload(file);
-                    file.previewElement.querySelector("[data-dz-complete] a").innerHTML = '<i class="px-2 text-base fas fa-ban"></i>';
-                }, false);
-            });
-            this.dzone.on("error", async (file, message) => {
-                if (file.previewElement) {
-                    file.previewElement.querySelector("[data-dz-complete] a").innerHTML = '<i class="px-2 text-base fas fa-ban"></i>';
-                    file.previewElement.classList.add("dz-error");
-                    if (typeof message !== "string" && message.error) {
-                        message = message.error;
-                    }
-                    for (let node of file.previewElement.querySelectorAll(
-                        "[data-dz-errormessage]"
-                    )) {
-                        node.textContent = message;
-                    }
-                }
-            });
-            this.dzone.on("uploadprogress", function (file, progress, bytesSent) {
-                document.querySelector("[data-dz-status]").innerHTML = 'Uploading ' + this.getActiveFiles().length + (this.getActiveFiles().length > 1 ? ' files' : ' file');
-                if (file.previewElement) {
-                    var progr = document.querySelector(".progress .determinate");
-                    if (progr === undefined || progr === null)
-                        return;
-                    progr.style['background-size'] = progress + "% auto";
-                }
-            });
-            this.dzone.on("success", async (file, response) => {
-                file.previewElement.querySelector("[data-dz-complete] a").innerHTML = '<i class="px-2 text-base fas fa-check"></i>';
-                if (this.dzone.getActiveFiles().length == 0) {
-                    await this.fetchFilesFolders();
-                }
-            });
-            this.dzone.on("canceled", async (file) => {
-                document.querySelector("[data-dz-status]").innerHTML = 'Upload canceled';
-                if (this.dzone.getActiveFiles().length == 0) {
-                    $fm.deleteFile('{{ config("filemanager.paths.uploads") }}' + file.name);
-                }
-            });
-            this.dzone.on("queuecomplete", async (file, response) => {
-                if (this.dzone.getActiveFiles().length == 0) {
-                    document.querySelector("[data-dz-status]").innerHTML = 'Upload complete'
-                }
-            });
-        },
-
-        switchLayout() {
-            if (this.layout_style == 'list') this.layout_style = 'grid'; else this.layout_style = 'list';
-        },
-
-        dragStart(dragged) {
-            dragged.classList.remove('hidden');
-            dragged.classList.add('absolute', 'top-[-1000px]', 'left-[-1000px]')
-            event.dataTransfer.setDragImage(dragged, 0, 0);
-            this.handle = dragged;
-            if (!this.selected.length) this.selectFile(dragged.dataset.key)
-        },
-
-        dragEnter(folder) {
-            folder.classList.add('outline', 'bg-gray-200');
-        },
-
-        dragLeave(folder) {
-            folder.classList.remove('outline', 'bg-gray-200');
-        },
-
-        dragEnd() {
-            if (this.handle) this.handle.classList.add('hidden')
-        },
-
-        async dragDrop(folder) {
-            folder.classList.remove('outline', 'bg-gray-200');
-            let paths = [];
-            this.selected.forEach(k => {
-                paths.push({from: this.files[k].path, to: folder.dataset.path + '/' + this.files[k].name + this.files[k].extension});
-            });
-            this.moveFile(JSON.stringify(paths));
-            this.selected = [];
-            if (this.handle) this.handle.classList.add('hidden');
-            await this.fetchFilesFolders();
-        },
-
-        initDetail(el) {
-            return {
-                filename: el.dataset.filename
-            }
-        },
-
-        keyDownHandler() {
-            if ($fm.modifiers.includes(event.key)) $fm.multiselect = true
-        },
-
-        keyUpHandler() {
-            if ($fm.modifiers.includes(event.key)) $fm.multiselect = false
-        },
-
-        getEndPoints(endpoint) {
-            const query = window.location.href.split("?");
-            if (query.length > 1) {
-                endpoint += `?${query[1]}`;
-            }
-            return endpoint
-        },
-
-        async fetchFilesFolders() {
-            try {
-                this.resetUI();
-                const response = await axios.get(this.getEndPoints('/filemanager/all-files'));
-                this.files = response.data.files;
-                this.folders = response.data.folders;
-                this.totalSize = response.data.total_size;
-            } catch (error) {
-                console.log(error);
-            }
-        },
-
-        resetUI() {
-            this.files = {};
-            this.folders = {};
-            this.totalSize = '';
-        },
-
-        async openFolder(folder) {
-            const fullUrl = window.location.href;
-            const selector = fullUrl.split("?");
-            if (selector.length > 1) {
-                window.location.href = `${fullUrl}/${folder}`;
-            } else {
-                window.location.href = `${fullUrl}?folder=${folder}`;
+            const startPreview = (video) => {
+                video.muted = true;
+                video.currentTime = 1;
+                video.playbackRate = 0.5;
+                video.play();
             }
 
-        },
+            const stopPreview = (video) => {
+                video.currentTime = 0;
+                video.playbackRate = 1;
+                video.pause();
+            }
 
-        async createFolder() {
-            if (!this.createForm.name || this.createForm.name.length == 0) return;
-            try {
-                const response = await axios.post(this.getEndPoints('/filemanager/create-folder'), {
-                    name: this.createForm.name,
+            const listen = (video) => {
+                let previewTimeout = null;
+                video.addEventListener("mouseenter", () => {
+                    startPreview(video);
+                    previewTimeout = setTimeout(stopPreview, 4000);
                 });
-                await this.fetchFilesFolders();
-                this.resetCreateForm();
-            } catch (error) {
-                console.log(error);
-            }
-        },
 
-        async openCreateForm() {
-            this.createForm = {
-                name: "",
-                visibility: true,
-            }
-        },
-
-        async openRenameForm(name, path) {
-            this.renameForm = {
-                name: name,
-                path: path,
-                visibility: true,
-            }
-        },
-
-        async renameFileFolder() {
-            if (!this.renameForm.name || this.renameForm.name.length == 0) return;
-            try {
-                const response = await axios.post(this.getEndPoints('/filemanager/rename'), {
-                    name: this.renameForm.name,
-                    path: this.renameForm.path
+                video.addEventListener("mouseleave", () => {
+                    clearTimeout(previewTimeout);
+                    previewTimeout = null;
+                    stopPreview(video);
                 });
-                await this.fetchFilesFolders();
-                this.resetRenameForm();
-            } catch (error) {
-                console.log(error);
             }
-        },
 
-        resetRenameForm() {
-            this.renameForm = {
+            if (videos.length) {
+                for (let i = 0; i < videos.length; i++) {
+                    listen(videos[i]);
+                }
+            }
+        }
+
+        const SetupLigthBox = () => {
+            const lightbox = GLightbox({
+                touchNavigation: true,
+                loop: true,
+                autoplayVideos: true
+            });
+        }
+
+        const $fm = filemanager = {
+            query: '',
+            renameForm: {
                 name: '',
                 path: '',
                 visibility: false,
-            }
-        },
-
-        resetCreateForm() {
-            this.createForm = {
+            },
+            createForm: {
                 name: '',
                 visibility: false,
-            }
-        },
-
-        async deleteFolder(path) {
-            try {
-                const response = await axios.post(this.getEndPoints('/filemanager/delete-folder'), {
-                    path: path
-                });
-                await this.fetchFilesFolders();
-            } catch (error) {
-                console.log(error);
-            }
-        },
-
-        async deleteFile(path) {
-            try {
-                const response = await axios.post(this.getEndPoints('/filemanager/delete-file'), {
-                    path: path
-                });
-                await this.fetchFilesFolders();
-            } catch (error) {
-                console.log(error);
-            }
-        },
-
-        async downloadFile(name, path) {
-            let p = path.split('/')
-            let fileName = p.pop()
-            var link = document.createElement("a");
-            link.download = fileName;
-            link.href = path;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            delete link;
-        },
-
-        async moveFile(paths) {
-            try {
-                const response = await axios.post(this.getEndPoints('/filemanager/move-file'), {
-                    paths: paths
-                });
-                this.details.file = false;
-            } catch (error) {
-                console.log(error);
-            }
-        },
-
-        async selectFile(key) {
-            if (this.selected.length > 0) {
-                if (!this.selected.includes(key)) {
-                    if (this.multiselect) {
-                        this.selected.push(key);
-                    } else {
-                        this.selected = [key]
+            },
+            dzone: null,
+            totalSize: '0 byte',
+            context: {
+                current: null,
+                init(el) {
+                    $fm.context.stash(el);
+                    return $fm.context.position(el);
+                },
+                position(el) {
+                    // convert html string into DOM
+                    const container = el.getBoundingClientRect();
+                    const pointer_x = event.clientX;
+                    const pointer_y = event.clientY;
+                    let cords = { y: pointer_y + 'px', x: pointer_x + 'px' }
+                    if (pointer_x + container.width > window.innerWidth) {
+                        cords.x = pointer_x - container.width + 'px';
                     }
+                    if (pointer_y + container.height > window.innerHeight) {
+                        cords.y = pointer_y - container.height + 'px';
+                    }
+                    return cords;
+                },
+                stash(el) {
+                    if ($fm.context.current == el) {
+                        return;
+                    } else if ($fm.context.current) {
+                        $fm.context.current._x_doHide();
+                    }
+                    $fm.context.current = el;
+                    $fm.context.current._x_doShow();
+                },
+            },
+            handle: null,
+            multiselect: false,
+            modifiers: ['Shift', 'Control'],
+            selected: [],
+            layout: 'grid',
+            details: {
+                show: false,
+                file: false,
+                init() {
+                    this.show = $fm.$persist(false)
+                },
+                load(file) {
+                    this.file = file
                 }
-            } else {
-                this.selected = [key]
-            }
-            setTimeout(() => this.details.load(this.files[key]), 100);
-        },
+            },
 
-        async removeSelected(file) {
-            if (this.selected.length > 0) {
-                this.selected = this.selected.filter(v => v !== file)
-            }
-        },
+            async init() {
+                //setup preview node for dropzone
+                let previewNode = document.querySelector("#dz-template");
+                previewNode.id = "";
+                let previewTemplate = previewNode.parentNode.innerHTML;
+                previewNode.parentNode.removeChild(previewNode);
+                this.dzone = new Dropzone("main#dropzone-container", {
+                    url: window.location.href,
+                    headers: { "X-CSRF-TOKEN": "{{ csrf_token }}" },
+                    clickable: false,
+                    paramName: 'files',
+                    previewTemplate: previewTemplate,
+                    previewsContainer: "#previews",
+                    maxFilesize: 1500,
+                    uploadMultiple: true,
+                    parallelUploads: 20,
+                    init: function () {
+                        const $this = this;
+                        document.addEventListener('click', function (event) {
+                            if (!event.target.matches('[data-dz-closepreviews]')) return;
+                            event.preventDefault();
+                            $this.removeAllFiles(true);
+                        }, false);
+                    }
+                });
+                document.addEventListener("keydown", this.keyDownHandler, false)
+                document.addEventListener("keyup", this.keyUpHandler, false)
+                this.dzoneEvents();
+                SetupVideoPreview();
+                SetupLigthBox();
+            },
 
-        getFileIcon(file) {
-            if (file) {
+            async dzoneEvents() {
+                this.dzone.on("addedfile", function (file) {
+                    document.getElementById('preview-container').classList.remove('invisible');
+                    const dzone = this;
+                    file.previewElement.addEventListener('click', function (event) {
+                        if (!event.target.matches('[data-dz-cancel]')) return;
+                        event.preventDefault();
+                        dzone.cancelUpload(file);
+                        file.previewElement.querySelector("[data-dz-complete] a").innerHTML = '<i class="px-2 text-base fas fa-ban"></i>';
+                    }, false);
+                });
+                this.dzone.on("error", async (file, message) => {
+                    if (file.previewElement) {
+                        file.previewElement.querySelector("[data-dz-complete] a").innerHTML = '<i class="px-2 text-base fas fa-ban"></i>';
+                        file.previewElement.classList.add("dz-error");
+                        if (typeof message !== "string" && message.error) {
+                            message = message.error;
+                        }
+                        for (let node of file.previewElement.querySelectorAll(
+                            "[data-dz-errormessage]"
+                        )) {
+                            node.textContent = message;
+                        }
+                    }
+                });
+                this.dzone.on("uploadprogress", function (file, progress, bytesSent) {
+                    document.querySelector("[data-dz-status]").innerHTML = 'Uploading ' + this.getActiveFiles().length + (this.getActiveFiles().length > 1 ? ' files' : ' file');
+                    if (file.previewElement) {
+                        var progr = document.querySelector(".progress .determinate");
+                        if (progr === undefined || progr === null)
+                            return;
+                        progr.style['background-size'] = progress + "% auto";
+                    }
+                });
+                this.dzone.on("success", async (file, response) => {
+                    file.previewElement.querySelector("[data-dz-complete] a").innerHTML = '<i class="px-2 text-base fas fa-check"></i>';
+                    if (this.dzone.getActiveFiles().length == 0) {
+                        await this.fetchFilesFolders();
+                    }
+                });
+                this.dzone.on("canceled", async (file) => {
+                    document.querySelector("[data-dz-status]").innerHTML = 'Upload canceled';
+                    if (this.dzone.getActiveFiles().length == 0) {
+                        $fm.deleteFile('{{ config("filemanager.paths.uploads") }}' + file.name);
+                    }
+                });
+                this.dzone.on("queuecomplete", async (file, response) => {
+                    if (this.dzone.getActiveFiles().length == 0) {
+                        document.querySelector("[data-dz-status]").innerHTML = 'Upload complete'
+                    }
+                });
+            },
+
+            switchLayout() {
+                if (this.layout_style == 'list') this.layout_style = 'grid'; else this.layout_style = 'list';
+            },
+
+            async searchFilesFolders() {
+                await this.fetchFilesFolders();
+            },
+
+            dragStart(dragged) {
+                dragged.classList.remove('hidden');
+                dragged.classList.add('absolute', 'top-[-1000px]', 'left-[-1000px]')
+                event.dataTransfer.setDragImage(dragged, 0, 0);
+                this.handle = dragged;
+                if (!this.selected.length) this.selectFile(dragged.dataset.key)
+            },
+
+            dragEnter(folder) {
+                folder.classList.add('outline', 'bg-gray-200');
+            },
+
+            dragLeave(folder) {
+                folder.classList.remove('outline', 'bg-gray-200');
+            },
+
+            dragEnd() {
+                if (this.handle) this.handle.classList.add('hidden')
+            },
+
+            async dragDrop(folder) {
+                folder.classList.remove('outline', 'bg-gray-200');
+                let paths = [];
+                this.selected.forEach(k => {
+                    paths.push({ from: this.files[k].path, to: folder.dataset.path + '/' + this.files[k].name + this.files[k].extension });
+                });
+                this.moveFile(JSON.stringify(paths));
+                this.selected = [];
+                if (this.handle) this.handle.classList.add('hidden');
+                await this.fetchFilesFolders();
+            },
+
+            initDetail(el) {
+                return {
+                    filename: el.dataset.filename
+                }
+            },
+
+            keyDownHandler() {
+                if ($fm.modifiers.includes(event.key)) $fm.multiselect = true
+            },
+
+            keyUpHandler() {
+                if ($fm.modifiers.includes(event.key)) $fm.multiselect = false
+            },
+
+            getEndPoints(endpoint) {
+                const query = window.location.href.split("?");
+                if (query.length > 1) {
+                    endpoint += `?${query[1]}&query=${this.query}`;
+                } else {
+                    endpoint += `?query=${this.query}`
+                }
+                return endpoint
+            },
+
+            async fetchFilesFolders() {
+                try {
+                    this.resetUI();
+                    const response = await axios.get(this.getEndPoints('/filemanager/all-files'));
+                    this.files = response.data.files;
+                    this.folders = response.data.folders;
+                    this.totalSize = response.data.total_size;
+                } catch (error) {
+                    console.log(error);
+                }
+            },
+
+            resetUI() {
+                this.files = {};
+                this.folders = {};
+                this.totalSize = '';
+            },
+
+            async openFolder(folder) {
+                const fullUrl = window.location.href;
+                const selector = fullUrl.split("?");
+                if (selector.length > 1) {
+                    window.location.href = `${fullUrl}/${folder}`;
+                } else {
+                    window.location.href = `${fullUrl}?folder=${folder}`;
+                }
+
+            },
+
+            async createFolder() {
+                if (!this.createForm.name || this.createForm.name.length == 0) return;
+                try {
+                    const response = await axios.post(this.getEndPoints('/filemanager/create-folder'), {
+                        name: this.createForm.name,
+                    });
+                    await this.fetchFilesFolders();
+                    this.resetCreateForm();
+                } catch (error) {
+                    console.log(error);
+                }
+            },
+
+            async openCreateForm() {
+                this.createForm = {
+                    name: "",
+                    visibility: true,
+                }
+            },
+
+            async openRenameForm(name, path) {
+                this.renameForm = {
+                    name: name,
+                    path: path,
+                    visibility: true,
+                }
+            },
+
+            async renameFileFolder() {
+                if (!this.renameForm.name || this.renameForm.name.length == 0) return;
+                try {
+                    const response = await axios.post(this.getEndPoints('/filemanager/rename'), {
+                        name: this.renameForm.name,
+                        path: this.renameForm.path
+                    });
+                    await this.fetchFilesFolders();
+                    this.resetRenameForm();
+                } catch (error) {
+                    console.log(error);
+                }
+            },
+
+            resetRenameForm() {
+                this.renameForm = {
+                    name: '',
+                    path: '',
+                    visibility: false,
+                }
+            },
+
+            resetCreateForm() {
+                this.createForm = {
+                    name: '',
+                    visibility: false,
+                }
+            },
+
+            async deleteFolder(path) {
+                try {
+                    const response = await axios.post(this.getEndPoints('/filemanager/delete-folder'), {
+                        path: path
+                    });
+                    await this.fetchFilesFolders();
+                } catch (error) {
+                    console.log(error);
+                }
+            },
+
+            async deleteFile(path) {
+                try {
+                    const response = await axios.post(this.getEndPoints('/filemanager/delete-file'), {
+                        path: path
+                    });
+                    await this.fetchFilesFolders();
+                } catch (error) {
+                    console.log(error);
+                }
+            },
+
+            async downloadFile(name, path) {
+                let p = path.split('/')
+                let fileName = p.pop()
+                var link = document.createElement("a");
+                link.download = fileName;
+                link.href = path;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                delete link;
+            },
+
+            async moveFile(paths) {
+                try {
+                    const response = await axios.post(this.getEndPoints('/filemanager/move-file'), {
+                        paths: paths
+                    });
+                    this.details.file = false;
+                } catch (error) {
+                    console.log(error);
+                }
+            },
+
+            async selectFile(key) {
+                if (this.selected.length > 0) {
+                    if (!this.selected.includes(key)) {
+                        if (this.multiselect) {
+                            this.selected.push(key);
+                        } else {
+                            this.selected = [key]
+                        }
+                    }
+                } else {
+                    this.selected = [key]
+                }
+                setTimeout(() => this.details.load(this.files[key]), 100);
+            },
+
+            async removeSelected(file) {
+                if (this.selected.length > 0) {
+                    this.selected = this.selected.filter(v => v !== file)
+                }
+            },
+
+            getFileIcon(file) {
+                if (file) {
+                    if (file.mime) {
+                        let fileType = file.mime.split('/')[0];
+                        if (fileType == 'image') {
+                            return `<em class="fas fa-file-image text-green-600"></em>`;
+                        }
+                        if (fileType == 'video') {
+                            return `<em class="fas fa-file-video text-purple-600"></em>`;
+                        }
+                        if (fileType == 'audio') {
+                            return `<em class="fas fa-file-audio text-blue-600"></em>`;
+                        }
+
+                        if (file.mime == 'application/pdf') {
+                            return `<em class="fas fa-file-pdf text-red-600"></em>`;
+                        }
+                    }
+                    return '<em class="fas fa-file text-gray-600"></em>'
+                }
+                return ''
+            },
+
+            getDetailPreview(file) {
+                let fragment = ``;
                 if (file.mime) {
                     let fileType = file.mime.split('/')[0];
                     if (fileType == 'image') {
-                        return `<em class="fas fa-file-image text-green-600"></em>`;
+                        fragment = `<div class="w-full h-40 bg-center bg-[url('${file.url}')] bg-contain bg-no-repeat"></div>`;
                     }
                     if (fileType == 'video') {
-                        return `<em class="fas fa-file-video text-purple-600"></em>`;
+                        fragment = `<video class="w-full h-40 bg-center object-cover"><source src="${file.url}" type="${file.mime}"></video>`;
                     }
                     if (fileType == 'audio') {
-                        return `<em class="fas fa-file-audio text-blue-600"></em>`;
-                    }
-
-                    if (file.mime == 'application/pdf') {
-                        return `<em class="fas fa-file-pdf text-red-600"></em>`;
-                    }
-                }
-                return '<em class="fas fa-file text-gray-600"></em>'
-            }
-            return ''
-        },
-
-        getDetailPreview(file) {
-            let fragment = ``;
-            if (file.mime) {
-                let fileType = file.mime.split('/')[0];
-                if (fileType == 'image') {
-                    fragment = `<div class="w-full h-40 bg-center bg-[url('${file.url}')] bg-contain bg-no-repeat"></div>`;
-                }
-                if (fileType == 'video') {
-                    fragment = `<video class="w-full h-40 bg-center object-cover"><source src="${file.url}" type="${file.mime}"></video>`;
-                }
-                if (fileType == 'audio') {
-                    fragment = `
+                        fragment = `
 						<div class="flex items-center justify-center w-full h-full object-center rounded">
 							<i class="fas fa-music text-4xl text-gray-600"></i>
 						</div>
 					`;
+                    }
+                    if (file.mime == 'application/pdf') {
+                        fragment = `<div :style="{'background-image': 'url(\\'/previews/${file.name}.jpg\\')'}" class="w-full h-40 bg-center bg-contain bg-no-repeat"></div>`;
+                    }
                 }
-                if (file.mime == 'application/pdf') {
-                    fragment = `<div :style="{'background-image': 'url(\\'/previews/${file.name}.jpg\\')'}" class="w-full h-40 bg-center bg-contain bg-no-repeat"></div>`;
-                }
-            }
-            return fragment;
-        },
+                return fragment;
+            },
 
-        async getFileTypePreview(file) {
-            try {
-                const response = await axios.post(this.getEndPoints('/filemanager/get-preview'), {
-                    file: JSON.stringify(file),
-                });
-                if (response.data.html) {
-                    return response.data.html
-                }else{
-                    return '<div class="flex items-center justify-center w-full h-full rounded"><i class="fas fa-file text-4xl text-gray-600"></i></div>'
+            async getFileTypePreview(file) {
+                try {
+                    const response = await axios.post(this.getEndPoints('/filemanager/get-preview'), {
+                        file: JSON.stringify(file),
+                    });
+                    if (response.data.html) {
+                        return response.data.html
+                    } else {
+                        return '<div class="flex items-center justify-center w-full h-full rounded"><i class="fas fa-file text-4xl text-gray-600"></i></div>'
+                    }
+                } catch (error) {
+                    console.log(error);
                 }
-            } catch (error) {
-                console.log(error);
-            }
-        },
+            },
 
-        generateModal(file) {
-            let fragment = '';
-            if (file.mime) {
-                let fileType = file.mime.split('/')[0];
-                if (fileType == 'image') {
-                    fragment = `
+            generateModal(file) {
+                let fragment = '';
+                if (file.mime) {
+                    let fileType = file.mime.split('/')[0];
+                    if (fileType == 'image') {
+                        fragment = `
                         <div x-ref="modal" class="fixed top-0 left-0 w-screen h-screen z-100 bg-black/80 flex justify-center items-center" :class="{'hidden': !modal}">
                             <img class="modal-img  max-w-[800px] max-h-[600px] object-cover" @click.away="modal=false;modalOpen=false" src="${file.url}" />
                         </div>`;
-                }
-                if (fileType == 'video') {
-                    fragment = `
+                    }
+                    if (fileType == 'video') {
+                        fragment = `
                         <div x-ref="modal" class="fixed top-0 left-0 w-screen h-screen z-100 bg-black/70 flex justify-center items-center" :class="{'hidden': !modal}">
                             <video x-ref="video" controls loop class="max-w-[800px] max-h-[600px]" @click.away="modal=false;modalOpen=false;$refs.video.pause();$refs.video.currentTime=0"><source src="${file.url}" type="${file.mime}"></video>
                         </div>`;
-                }
-                if (fileType == 'audio') {
-                    fragment = `
+                    }
+                    if (fileType == 'audio') {
+                        fragment = `
                         <div x-ref="modal" class="fixed top-0 left-0 w-screen h-screen z-100 bg-black/70 flex justify-center items-center" :class="{'hidden': !modal}">
                             <audio x-ref="audio" controls loop class="max-w-[800px] max-h-[600px]" @click.away="modal=false;modalOpen=false;$refs.audio.pause();$refs.audio.currentTime=0"><source src="${file.url}" type="${file.mime}" /></audio>
                         </div>`;
-                }
-                if (file.mime == 'application/pdf') {
-                    fragment = `
+                    }
+                    if (file.mime == 'application/pdf') {
+                        fragment = `
                         <div x-ref="modal" class="fixed top-0 left-0 w-screen h-screen z-100 bg-black/70 flex justify-center items-center" :class="{'hidden': !modal}">
                             <object class="w-[800px] h-[600px]" @click.away="modal=false;modalOpen=false;" data="${file.url}"></object>
                         </div>`;
+                    }
                 }
-            }
-            return fragment;
-        },
+                return fragment;
+            },
 
-    }
+        }
 
-</script>
+    </script>
 </body>
 
 </html>
