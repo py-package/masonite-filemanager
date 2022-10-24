@@ -10,3 +10,4 @@
 """
 
 DRIVER = "local"  # local or s3
+MIDDLEWARE = ["web"]
