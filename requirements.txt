@@ -1,2 +1,3 @@
 masonite>=4,<5
 masonite-orm>=2,<3
+pdf2image==1.16.0
