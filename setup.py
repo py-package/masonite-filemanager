@@ -8,7 +8,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version="0.1.1",
+    version="0.1.2",
     packages=[
         "filemanager",
         "filemanager.config",
@@ -19,6 +19,7 @@ setup(
         "filemanager.routes",
         "filemanager.resources",
         "filemanager.templates",
+        "filemanager.templates.partials",
     ],
     package_dir={"": "src"},
     description="File management solution for Masonite",
@@ -41,7 +42,7 @@ setup(
         #   3 - Alpha
         #   4 - Beta
         #   5 - Production/Stable
-        "Development Status :: 3 - Beta",
+        "Development Status :: 4 - Beta",
         # Indicate who your project is intended for
         "Intended Audience :: Developers",
         "Environment :: Web Environment",
