@@ -8,7 +8,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version="0.1.2",
+    version="0.1.3",
     packages=[
         "filemanager",
         "filemanager.config",
@@ -20,6 +20,7 @@ setup(
         "filemanager.resources",
         "filemanager.templates",
         "filemanager.templates.partials",
+        "filemanager.templates.partials.previews",
     ],
     package_dir={"": "src"},
     description="File management solution for Masonite",
@@ -88,8 +89,11 @@ setup(
     # have to be included in MANIFEST.in as well.
     package_data={
         'filemanager': [
-            'templates/*',
-            'templates/partials/*'
+            'templates/*.html',
+            'templates/partials/*.html',
+            'templates/partials/previews/*.html',
+            'resources/*.js',
+            'resources/*.css'
         ],
     },
 )
